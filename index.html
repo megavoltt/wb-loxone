@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WB → Loxone</title>
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--ink:#1d2330;--mute:#6b7383;--line:#e3e6eb;--acc:#69b12e;--acc2:#2f6fd6;--warn:#c9821a;--bad:#c93c3c;--chip:#eef1f4}
+@media (prefers-color-scheme:dark){:root{--bg:#14171c;--card:#1d2128;--ink:#e6e9ee;--mute:#8d96a5;--line:#2c323b;--chip:#262c35}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+header h1{font-size:17px;margin:0;font-weight:650}
+header h1 b{color:var(--acc)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.chip{background:var(--chip);border-radius:20px;padding:3px 10px;font-size:12px;color:var(--mute);white-space:nowrap}
+.chip.ok{color:var(--acc)}.chip.bad{color:var(--bad)}
+main{max-width:1100px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.card h2{font-size:15px;margin:0 0 10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px 14px}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mute)}
+input[type=text],input[type=number],input[type=password]{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:100%}
+button,.btn{font:inherit;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:6px;padding:6px 12px;cursor:pointer;text-decoration:none;display:inline-block}
+button.p,.btn.p{background:var(--acc);border-color:var(--acc);color:#fff}
+button:hover,.btn:hover{filter:brightness(1.05)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.toolbar input[type=text]{max-width:280px}
+.dev{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;overflow:hidden}
+.dev>.hd{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;user-select:none}
+.dev>.hd .t{font-weight:600}
+.dev>.hd .id{color:var(--mute);font-size:12px;font-family:ui-monospace,Consolas,monospace}
+.dev>.hd .cnt{margin-left:auto;font-size:12px;color:var(--mute)}
+.tpl{display:flex;gap:4px}
+.tpl a{font-size:11px;padding:2px 7px;border-radius:5px;border:1px solid var(--acc);color:var(--acc);text-decoration:none;white-space:nowrap}
+.tpl a:hover{background:var(--acc);color:#fff}
+.dev>.hd .cnt.on{color:var(--acc);font-weight:600}
+.dev .bd{border-top:1px solid var(--line);display:none}
+.dev.open .bd{display:block}
+.alias{display:flex;gap:8px;align-items:center;padding:8px 14px;border-bottom:1px solid var(--line);font-size:12px;color:var(--mute)}
+.alias input{max-width:320px}
+table{width:100%;border-collapse:collapse}
+td,th{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-size:11px;color:var(--mute);font-weight:500;text-transform:uppercase;letter-spacing:.03em}
+tr:last-child td{border-bottom:0}
+td.mono{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--mute)}
+td.v{font-variant-numeric:tabular-nums;white-space:nowrap}
+td.v.err{color:var(--bad)}
+.dir{font-size:11px;border-radius:4px;padding:1px 6px;white-space:nowrap}
+.dir.in{background:rgba(47,111,214,.12);color:var(--acc2)}
+.dir.io{background:rgba(105,177,46,.15);color:var(--acc)}
+.dir.out{background:rgba(201,130,26,.15);color:var(--warn)}
+.sw{position:relative;width:34px;height:20px;display:inline-block}
+.sw input{opacity:0;width:0;height:0}
+.sw span{position:absolute;inset:0;background:var(--line);border-radius:20px;transition:.15s}
+.sw span:before{content:"";position:absolute;width:14px;height:14px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.15s}
+.sw input:checked+span{background:var(--acc)}
+.sw input:checked+span:before{transform:translateX(14px)}
+.mini{padding:2px 8px;font-size:12px}
+details.help summary{cursor:pointer;font-weight:600}
+details.help ol{padding-left:20px}
+code{background:var(--chip);padding:1px 5px;border-radius:4px;font-size:12px}
+.sys-h{color:var(--mute);font-size:12px;margin:18px 0 8px}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:8px;opacity:0;transition:.2s;pointer-events:none}
+#toast.on{opacity:.92}
+@media (max-width:640px){td.mono,th.mono{display:none}.chips{margin-left:0}}
+</style>
+</head>
+<body>
+<header>
+  <h1>WB <b>→</b> Loxone</h1>
+  <div class="chips">
+    <span class="chip" id="c-mqtt">MQTT …</span>
+    <span class="chip" id="c-sel">выбрано 0</span>
+    <span class="chip" id="c-udp">UDP 0</span>
+    <span class="chip" id="c-cmd">команд 0</span>
+    <span class="chip" id="c-ver"></span>
+  </div>
+</header>
+<main>
+  <div class="card">
+    <h2>Подключение к Loxone</h2>
+    <div class="grid">
+      <label class="f">IP Miniserver<input type="text" id="miniserver" placeholder="192.168.1.77"></label>
+      <label class="f">Порт виртуального входа UDP<input type="number" id="udp_port"></label>
+      <label class="f">Имя блоков в Loxone Config<input type="text" id="title"></label>
+      <label class="f">Адрес WB для Loxone (пусто — авто)<input type="text" id="wb_host"></label>
+      <label class="f">Порт веб-интерфейса и команд<input type="number" id="http_port"></label>
+      <label class="f">Не чаще, мс на канал<input type="number" id="throttle_ms"></label>
+      <label class="f">Полная пересылка, с (0 — выкл.)<input type="number" id="resync_s"></label>
+      <label class="f">Ожидание след. нажатия, мс<input type="number" id="click_ms"></label>
+      <label class="f">Долгое нажатие от, мс<input type="number" id="long_ms"></label>
+      <label class="f">Пароль веб-интерфейса<input type="password" id="ui_password" placeholder="не задан" autocomplete="new-password"></label>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button class="p" onclick="saveCfg()">Сохранить</button>
+      <span class="chip">ключ команд: <b id="key"></b></span>
+      <button class="mini" onclick="newKey()">Новый ключ</button>
+      <span style="flex:1"></span>
+      <a class="btn p" href="template/all.zip" title="Отдельные VIU_/VO_ для каждого устройства с выбранными каналами">Шаблоны всех устройств (ZIP)</a>
+      <a class="btn" href="template/viu.xml" title="Все выбранные каналы одним блоком">Общий VIU</a>
+      <a class="btn" href="template/vo.xml" title="Все выбранные каналы одним блоком">Общий VO</a>
+      <button onclick="resync()">Переслать значения</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <details class="help">
+      <summary>Как подключить в Loxone Config</summary>
+      <ol>
+        <li>Задайте IP Miniserver и сохраните. Отметьте ниже нужные каналы — выбор сохраняется сразу.</li>
+        <li>Шаблоны делаются <b>на каждое устройство отдельно</b>, как в MegaFlex: блок в Loxone называется именем устройства (поле «Имя в Loxone»), файлы <code>VIU_Имя.xml</code> и <code>VO_Имя.xml</code>. Скачать — кнопками VIU / VO у устройства или все сразу архивом ZIP.</li>
+        <li>Положите файлы в <code>Документы\Loxone\Loxone Config\Templates\VirtualIn</code> (VIU_) и <code>…\VirtualOut</code> (VO_), либо импортируйте: Периферия → Виртуальные входы → <b>Импорт шаблона</b> (и так же для Виртуальных выходов).</li>
+        <li>Перетащите нужные входы/выходы на страницу программы и сохраните в Miniserver.</li>
+        <li>Значения приходят по UDP сразу при изменении; раз в «Полную пересылку» мост повторяет все — Loxone подхватит их после перезагрузки.</li>
+        <li><b>Кнопки.</b> У каждого входа со счётчиком (<code>Input N</code> + <code>Input N counter</code>) есть каналы «одинарное», «двойное», «тройное», «долгое» — импульс 1→0. Число нажатий берётся из аппаратного счётчика модуля, поэтому короткие нажатия не теряются даже на медленной шине. Удержание для диммирования и жалюзи — обычный канал <code>Input N</code>. Одинарное приходит через «Ожидание след. нажатия» после отпускания.</li>
+        <li>RGB: выход Loxone (BBBGGGRRR, %) переводится в <code>R;G;B</code> WB автоматически. Диммеры и уставки — аналоговые выходы <code>&lt;v&gt;</code>.</li>
+        <li>После изменения выбора каналов шаблон нужно импортировать заново — Loxone добавит недостающие команды в существующий блок с тем же именем, если импортировать его поверх.</li>
+      </ol>
+      <p style="color:var(--mute)">Команды Loxone приходят на <code>http://WB:порт/set/ключ/устройство/канал/значение</code>. Без верного ключа и для невыбранных каналов команды отклоняются.</p>
+    </details>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" id="q" placeholder="Поиск устройства или канала…" oninput="applyFilter()">
+    <label class="row" style="gap:6px"><input type="checkbox" id="onlySel" onchange="applyFilter()"> только выбранные</label>
+    <span style="flex:1"></span>
+    <button class="mini" onclick="openAll(true)">Развернуть всё</button>
+    <button class="mini" onclick="openAll(false)">Свернуть</button>
+  </div>
+  <div id="devs"></div>
+  <div class="sys-h" id="sysh" hidden>Системные устройства</div>
+  <div id="sys"></div>
+</main>
+<div id="toast"></div>
+<script>
+let S = null, sig = "", opened = new Set(JSON.parse(localStorageGet("open") || "[]"));
+function localStorageGet(k){try{return localStorage.getItem("wblox."+k)}catch(e){return null}}
+function localStorageSet(k,v){try{localStorage.setItem("wblox."+k,v)}catch(e){}}
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("on"),2200)}
+async function api(path, body){
+  const r = await fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body||{})});
+  const t = await r.text(); if(!r.ok) throw new Error(t); return t;
+}
+const CFG = ["miniserver","udp_port","title","wb_host","http_port","throttle_ms","resync_s","click_ms","long_ms"];
+function fillCfg(c){
+  CFG.forEach(k=>{ if(document.activeElement!==$(k)) $(k).value = c[k] ?? "" });
+  $("key").textContent = c.key;
+  $("ui_password").placeholder = c.has_password ? "задан — введите новый, чтобы сменить" : "не задан";
+}
+async function saveCfg(){
+  const b = {}; CFG.forEach(k=>b[k]=$(k).value.trim());
+  if($("ui_password").value) b.ui_password = $("ui_password").value;
+  try{ await api("api/config", b); $("ui_password").value=""; toast("Сохранено");
+    if(+b.http_port !== S.config.http_port) toast("Порт изменится после перезапуска службы");
+    load(); }catch(e){toast("Ошибка: "+e.message)}
+}
+async function newKey(){
+  if(!confirm("Сменить ключ? Шаблон VO придётся импортировать в Loxone заново.")) return;
+  $("key").textContent = await api("api/newkey"); toast("Новый ключ задан");
+}
+async function resync(){ const n = await api("api/resync"); toast("Отправлено значений: "+n) }
+
+function dirOf(c){ if(c.r && !c.w && !c.num) return ["out","текст — не передаётся"]; return c.r && c.w ? ["io","⇄ вход и выход"] : c.w ? ["out","← выход"] : ["in","→ вход"] }
+function fmt(c){
+  if(c.value==null) return "—";
+  if(c.type==="event") return c.value==="1" ? '<b style="color:var(--acc)">● нажатие</b>' : '<span style="color:var(--mute)">ожидание</span>';
+  if(c.type==="switch"||c.type==="alarm") return c.value==="1" ? "вкл" : "выкл";
+  if(c.type==="rgb") return '<span style="display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;background:rgb('+esc(c.value.split(";").join(","))+')"></span> '+esc(c.value);
+  return esc(c.value)+(c.unit?" "+esc(c.unit):"");
+}
+function ctrlTest(d,c){
+  if(!c.w) return "";
+  if(c.type==="switch") return `<button class="mini" onclick="test('${esc(d)}','${esc(c.id)}',null)">⇆</button>`;
+  if(c.type==="pushbutton") return `<button class="mini" onclick="test('${esc(d)}','${esc(c.id)}','1')">▶</button>`;
+  return `<button class="mini" onclick="test('${esc(d)}','${esc(c.id)}','?')">✎</button>`;
+}
+// Последние отправленные команды: пока устройство не подтвердило новое состояние,
+// переключаем и показываем от них, а не от устаревшего значения из опроса
+const sent = {};
+const SENT_MS = 3000;
+function overlay(){
+  const now = Date.now();
+  S.devices.forEach(d=>d.controls.forEach(c=>{
+    const k = d.id+"/"+c.id, p = sent[k];
+    if(!p) return;
+    if(now-p.t > SENT_MS || c.value===p.v) delete sent[k]; else c.value = p.v;
+  }));
+}
+async function test(d,c,v){
+  const ctl = S.devices.find(x=>x.id===d).controls.find(x=>x.id===c);
+  if(v===null) v = ctl.value==="1" ? "0" : "1";
+  if(v==="?"){ v = prompt("Значение для "+ctl.title+(ctl.type==="rgb"?" (R;G;B)":""), ctl.value||""); if(v==null) return; }
+  try{
+    await api("api/test",{dev:d,ctrl:c,value:v});
+    if(ctl.type!=="pushbutton"){ sent[d+"/"+c] = {v, t:Date.now()}; ctl.value = v; render(false); }
+    setTimeout(load, 300);
+  }catch(e){ toast("Отклонено: "+e.message) }
+}
+function isSel(d,c){ return !!S.config.selected[d+"/"+c] }
+function devHtml(d){
+  const n = d.controls.filter(c=>isSel(d.id,c.id)).length;
+  const alias = S.config.aliases[d.id] || "";
+  return `<div class="dev ${opened.has(d.id)?"open":""}" data-id="${esc(d.id)}">
+  <div class="hd" onclick="toggleOpen(this.parentNode)">
+    <input type="checkbox" title="все каналы" onclick="event.stopPropagation()" onchange="selDev('${esc(d.id)}',this.checked)" ${n&&n===d.controls.length?"checked":""}>
+    <span class="t">${esc(alias||d.title)}</span><span class="id">${esc(d.id)}</span>
+    <span class="cnt ${n?"on":""}" id="cnt-${esc(d.id)}">${n?("в Loxone "+n+" из "+d.controls.length):(d.controls.length+" каналов")}</span>
+    <span class="tpl" onclick="event.stopPropagation()">${d.n_in?`<a href="template/viu.xml?dev=${encodeURIComponent(d.id)}" title="Виртуальный вход UDP: ${d.n_in} кан.">VIU</a>`:""}${d.n_out?`<a href="template/vo.xml?dev=${encodeURIComponent(d.id)}" title="Виртуальный выход HTTP: ${d.n_out} кан.">VO</a>`:""}</span>
+  </div>
+  <div class="bd">
+    <div class="alias">Имя в Loxone <input type="text" value="${esc(alias)}" placeholder="${esc(d.title)}" onchange="setAlias('${esc(d.id)}',this.value)"></div>
+    <table><tr><th></th><th>Канал</th><th class="mono">ID</th><th>Тип</th><th>Значение</th><th>Направление</th><th></th></tr>
+    ${d.controls.map(c=>{const [k,t]=dirOf(c);return `<tr data-q="${esc((c.title+" "+c.id).toLowerCase())}">
+      <td><label class="sw"><input type="checkbox" ${isSel(d.id,c.id)?"checked":""} onchange="selOne('${esc(d.id)}','${esc(c.id)}',this.checked)"><span></span></label></td>
+      <td>${esc(c.title)}</td><td class="mono">${esc(c.id)}</td><td class="mono" style="display:table-cell">${esc(c.type)}</td>
+      <td class="v ${c.error?"err":""}" id="v-${esc(d.id)}-${esc(c.id)}">${fmt(c)}</td>
+      <td><span class="dir ${k}">${t}</span></td><td>${ctrlTest(d.id,c)}</td></tr>`}).join("")}
+    </table>
+  </div></div>`;
+}
+function toggleOpen(el){ el.classList.toggle("open"); const id=el.dataset.id;
+  el.classList.contains("open")?opened.add(id):opened.delete(id); localStorageSet("open",JSON.stringify([...opened])) }
+function openAll(on){ document.querySelectorAll(".dev").forEach(e=>{e.classList.toggle("open",on); on?opened.add(e.dataset.id):opened.delete(e.dataset.id)}); localStorageSet("open",JSON.stringify([...opened])) }
+async function pushSel(){ await api("api/config",{selected:S.config.selected}); render(true); }
+function selOne(d,c,on){ on?S.config.selected[d+"/"+c]=true:delete S.config.selected[d+"/"+c]; pushSel() }
+function selDev(d,on){ S.devices.find(x=>x.id===d).controls.forEach(c=>on?S.config.selected[d+"/"+c.id]=true:delete S.config.selected[d+"/"+c.id]); pushSel() }
+async function setAlias(d,v){ v=v.trim(); v?S.config.aliases[d]=v:delete S.config.aliases[d]; await api("api/config",{aliases:S.config.aliases}); render(true); toast("Имя сохранено") }
+
+function render(force){
+  const s = JSON.stringify(S.devices.map(d=>[d.id,d.controls.map(c=>c.id)]));
+  if(force || s!==sig){
+    sig = s;
+    $("devs").innerHTML = S.devices.filter(d=>!d.system).map(devHtml).join("");
+    const sys = S.devices.filter(d=>d.system);
+    $("sysh").hidden = !sys.length; $("sys").innerHTML = sys.map(devHtml).join("");
+    applyFilter();
+  } else {
+    S.devices.forEach(d=>d.controls.forEach(c=>{ const e=$("v-"+d.id+"-"+c.id); if(e){ const h=fmt(c); if(e.innerHTML!==h) e.innerHTML=h; e.classList.toggle("err",!!c.error) } }));
+  }
+  const n = Object.keys(S.config.selected).length;
+  $("c-sel").textContent = "выбрано "+n;
+  $("c-mqtt").textContent = S.mqtt ? "MQTT подключён" : "MQTT нет связи"; $("c-mqtt").className = "chip "+(S.mqtt?"ok":"bad");
+  $("c-udp").textContent = "UDP → "+(S.config.miniserver||"не задан")+": "+S.stats.udp;
+  $("c-udp").className = "chip "+(S.config.miniserver?"":"bad");
+  $("c-cmd").textContent = "команд "+S.stats.cmd; $("c-cmd").title = S.stats.last_cmd||"";
+  $("c-ver").textContent = "v"+S.version;
+}
+function applyFilter(){
+  const q = $("q").value.trim().toLowerCase(), only = $("onlySel").checked;
+  document.querySelectorAll(".dev").forEach(e=>{
+    const d = S.devices.find(x=>x.id===e.dataset.id);
+    const hitDev = !q || (d.title+" "+d.id+" "+(S.config.aliases[d.id]||"")).toLowerCase().includes(q);
+    let any = false;
+    e.querySelectorAll("tr[data-q]").forEach((tr,i)=>{
+      const c = d.controls[i];
+      const ok = (hitDev || tr.dataset.q.includes(q)) && (!only || isSel(d.id,c.id));
+      tr.hidden = !ok; any = any || ok;
+    });
+    e.hidden = !any;
+    if(q && any) e.classList.add("open");
+  });
+}
+async function load(){
+  try{
+    const r = await fetch("api/state",{cache:"no-store"}); S = await r.json(); overlay();
+    fillCfg(S.config); render(false);
+  }catch(e){ $("c-mqtt").textContent="нет связи с мостом"; $("c-mqtt").className="chip bad" }
+}
+load(); setInterval(load, 1000);
+</script>
+</body>
+</html>
