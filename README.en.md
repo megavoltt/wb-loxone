@@ -13,6 +13,8 @@ wb-rules virtual devices, anything published to MQTT — to a
              ◄───────────────────◄──HTTP── Virtual output        ┘ Miniserver
 ```
 
+![Web UI](docs/img/web-ui.png)
+
 * **States are pushed on change** over UDP — no polling from Loxone.
 * **Commands** from Loxone virtual outputs take a few milliseconds inside the bridge.
 * **Per-device templates** for Loxone Config (`VIU_<name>.xml`, `VO_<name>.xml`),
