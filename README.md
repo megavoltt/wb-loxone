@@ -51,7 +51,7 @@ wb-rules — всё, что контроллер публикует в MQTT.
 На контроллере Wiren Board, под root:
 
 ```bash
-wget -qO- https://raw.githubusercontent.com/megavolt/wb-loxone/main/install.sh | sh
+wget -qO- https://raw.githubusercontent.com/megavoltt/wb-loxone/main/install.sh | sh
 ```
 
 В конце установщик покажет адрес веб-интерфейса — по умолчанию
@@ -75,6 +75,11 @@ Debian 11, Python 3.9), Loxone Miniserver Gen1 или Gen2, Loxone Config 16 и 
 5. В Loxone Config: «Виртуальные входы» → «Импорт шаблона» → `VIU_…xml`, затем
    так же «Виртуальные выходы» → `VO_…xml`. Перетащите нужные входы и выходы на
    страницу программы и сохраните в Miniserver.
+
+После импорта блоки выглядят так — один блок на устройство, строки «канал — устройство»:
+
+![Виртуальные выходы реле WB-MR6C в Loxone Config](docs/img/loxone-vo-relays.png)
+![Кнопка WB-MRM2-mini: состояние входа и события нажатий](docs/img/loxone-buttons.png)
 
 Подробнее, с примерами подключения к блокам, — в [docs/loxone.md](docs/loxone.md).
 

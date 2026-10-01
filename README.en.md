@@ -27,7 +27,7 @@ wb-rules virtual devices, anything published to MQTT — to a
 On the Wiren Board controller, as root:
 
 ```bash
-wget -qO- https://raw.githubusercontent.com/megavolt/wb-loxone/main/install.sh | sh
+wget -qO- https://raw.githubusercontent.com/megavoltt/wb-loxone/main/install.sh | sh
 ```
 
 Then open `http://<controller IP>:8099`, set the Miniserver IP, select channels,

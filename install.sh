@@ -1,13 +1,13 @@
 #!/bin/sh
 # Установка и обновление моста WB → Loxone на контроллере Wiren Board.
 #
-#   wget -qO- https://raw.githubusercontent.com/megavolt/wb-loxone/main/install.sh | sh
+#   wget -qO- https://raw.githubusercontent.com/megavoltt/wb-loxone/main/install.sh | sh
 #
 # Код и настройки — в /mnt/data: переживают обновление прошивки. В корневой ФС
 # только файл службы; после перепрошивки FIT запустить установку ещё раз.
 # Повторный запуск = обновление: настройки и выбор каналов сохраняются.
 set -e
-REPO=${WBLOX_REPO:-megavolt/wb-loxone}
+REPO=${WBLOX_REPO:-megavoltt/wb-loxone}
 BRANCH=${WBLOX_BRANCH:-main}
 DIR=/mnt/data/wb-loxone
 FILES="wbloxone.py index.html install.sh"
