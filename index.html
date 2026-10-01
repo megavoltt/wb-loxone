@@ -208,7 +208,7 @@ function devHtml(d){
   <div class="hd" onclick="toggleOpen(this.parentNode)">
     <input type="checkbox" title="все каналы" onclick="event.stopPropagation()" onchange="selDev('${esc(d.id)}',this.checked)" ${n&&n===d.controls.length?"checked":""}>
     <span class="t">${esc(alias||d.title)}</span><span class="id">${esc(d.id)}</span>
-    <span class="cnt ${n?"on":""}" id="cnt-${esc(d.id)}">${n?("в Loxone "+n+" из "+d.controls.length):(d.controls.length+" каналов")}</span>
+    <span class="cnt ${n?"on":""}" id="cnt-${esc(d.id)}">${n?("Шаблон в Loxone "+n+" из "+d.controls.length):(d.controls.length+" каналов")}</span>
     <span class="tpl" onclick="event.stopPropagation()">${d.n_in?`<a href="template/viu.xml?dev=${encodeURIComponent(d.id)}" title="Виртуальный вход UDP: ${d.n_in} кан.">VIU</a>`:""}${d.n_out?`<a href="template/vo.xml?dev=${encodeURIComponent(d.id)}" title="Виртуальный выход HTTP: ${d.n_out} кан.">VO</a>`:""}</span>
   </div>
   <div class="bd">
