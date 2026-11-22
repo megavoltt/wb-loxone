@@ -68,11 +68,15 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           cd "$RUNNER_TEMP"
-          git clone --depth 1 "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" apt-repo
+          # Не клонируем весь репозиторий: пустой git init и дотягивание
+          # только ветки apt в FETCH_HEAD. В depth-1 клоне git checkout apt
+          # не находит ветку (она не скачана) и падает в --orphan, после
+          # чего push отклоняется как non-fast-forward. Так checkout
+          # гарантированно получает кончик apt, а push выходит fast-forward.
+          git init apt-repo
           cd apt-repo
-          # depth-1 клон не содержит ветку apt — дотягиваем её явно,
-          # иначе checkout падает в --orphan и push отклоняется (non-fast-forward)
-          git fetch --depth 1 origin apt && git checkout apt || git checkout --orphan apt
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth 1 origin apt && git checkout -B apt FETCH_HEAD || git checkout --orphan apt
           git rm -rf . >/dev/null 2>&1 || true
           cp "$GITHUB_WORKSPACE/$DEB" .
           dpkg-scanpackages . /dev/null > Packages
