@@ -932,7 +932,7 @@ def make_handler(cfg, model, bridge):
             return False
 
         def do_GET(self):
-            path = urllib.parse.ysplit(self.path).path
+            path = urllib.parse.urlsplit(self.path).path
             parts = [urllib.parse.unquote(p) for p in path.split("/")]
             # Команды Loxone: /set/<ключ>/<устройство>/<канал>/<значение> — по ключу, без пароля
             if len(parts) >= 6 and parts[1] == "set":
