@@ -29,7 +29,7 @@ Loxone as separate pulses.
   Loxone Config named after the device, lines like "channel — device".
 * **Buttons.** The press count comes from the module's hardware pulse counter,
   so short presses are not lost even on a slow bus. Details —
-  [docs/buttons.md](docs/buttons.md) (in Russian).
+  [docs/en/buttons.md](docs/en/buttons.md).
 * **Nothing is installed on the controller.** One file on the standard
   Python 3.9 already present in the firmware. No pip, no Node-RED, no
   separate server.
@@ -114,18 +114,18 @@ are coming):
 ![Virtual outputs of WB-MR6C relays in Loxone Config](docs/img/loxone-vo-relays.png)
 ![WB-MRM2-mini button: input state and press events](docs/img/loxone-buttons.png)
 
-More details, with wiring examples, in [docs/loxone.md](docs/loxone.md)
-(in Russian).
+More details, with wiring examples, in [docs/en/loxone.md](docs/en/loxone.md).
 
 ## Documentation
 
-* [docs/buttons.md](docs/buttons.md) — buttons: how presses are detected, settings, delays, debugging
-* [docs/loxone.md](docs/loxone.md) — importing templates and wiring to Loxone blocks
-* [docs/wirenboard.md](docs/wirenboard.md) — module input modes, Modbus events, RS-485 bus
-* [docs/protocol.md](docs/protocol.md) — UDP and HTTP formats, settings file, web UI API
+* [docs/en/buttons.md](docs/en/buttons.md) — buttons: how presses are detected, settings, delays, debugging
+* [docs/en/loxone.md](docs/en/loxone.md) — importing templates and wiring to Loxone blocks
+* [docs/en/wirenboard.md](docs/en/wirenboard.md) — module input modes, Modbus events, RS-485 bus
+* [docs/en/protocol.md](docs/en/protocol.md) — UDP and HTTP formats, settings file, web UI API
 * [CHANGELOG.md](CHANGELOG.md) — what changed between versions
 
-English translations of `docs/` are planned; contributions are welcome.
+(Russian originals live in `docs/`; other languages are welcome as
+`docs/<code>/` folders, same layout as `docs/en/`.)
 
 ## Where things live on the controller
 
@@ -164,8 +164,10 @@ The bridge is designed for a local network.
 ## Translations
 
 The web UI is available in Russian and English (switcher in the header).
-Documentation translations are welcome — see the notes in
-[README.md](README.md).
+The documentation is available in English (`docs/en/`, Russian originals in
+`docs/`). Translations into more languages are welcome — a language is a
+`docs/<code>/` folder with the same files as `docs/en/`, plus a key in the
+`I18N` dictionary in `index.html` for the web UI.
 
 ## License
 
