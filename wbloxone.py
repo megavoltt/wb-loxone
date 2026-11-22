@@ -5,7 +5,7 @@ WB → Loxone: мост устройств Wiren Board в Loxone Miniserver.
 Читает дерево MQTT контроллера (/devices/#), даёт в веб-интерфейсе выбрать
 каналы и формирует шаблоны для импорта в Loxone Config:
 
-  * VIU_*.xml — виртуальный вход UDP: мост шлёт на Minisервер строки
+  * VIU_*.xml — виртуальный вход UDP: мост шлёт на Miniserver строки
     `wb.<устройство>.<канал>=<значение>` при каждом изменении;
   * VO_*.xml  — виртуальный выход HTTP: Miniserver вызывает
     `http://<wb>:<порт>/set/<ключ>/<устройство>/<канал>/<значение>`,
@@ -685,7 +685,7 @@ class Buttons:
                     return
                 down = value == "1"
                 if down != st["down"]:
-                    self.trace(d, c, "нажата" если down else "отпущена")
+                    self.trace(d, c, "нажата" if down else "отпущена")
                 if down and not st["down"]:
                     st["down_at"], st["long"] = now, False
                 elif not down and st["down"]:
