@@ -305,7 +305,11 @@ class Model:
                     self.dev(d)["controls"][c]["value"] = None
                     return
                 ctl = self.ctl(d, c)
-                changed = ctl["value"] != payload
+                # текстовые каналы событийные (action zigbee2mqtt и т.п.): то же
+                # значение подряд — новое событие, а не дубль (иначе второе из двух
+                # одинаковых нажатий подряд пропадает)
+                eventful = (ctl["meta"].get("type") or "value") == "text"
+                changed = ctl["value"] != payload or eventful
                 ctl["value"], ctl["ts"] = payload, time.time()
             elif p[5] == "meta":
                 m = self.ctl(d, c)["meta"]
@@ -492,7 +496,9 @@ class Bridge:
         if t == "text" and to_loxone(t, value) is None:
             self.learn_text(d, c, value)
         key = d + "/" + c
-        thr = 0 if t in BINARY_TYPES else self.cfg["throttle_ms"] / 1000.0
+        # текстовые события не дросселируем: каждое значение — отдельное
+        # событие, задержка/перезапись окном теряют нажатия
+        thr = 0 if t in BINARY_TYPES or t == "text" else self.cfg["throttle_ms"] / 1000.0
         now = time.time()
         with self.plock:
             last = self.last_sent.get(key, (0, None))[0]
