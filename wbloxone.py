@@ -13,6 +13,7 @@ WB → Loxone: мост устройств Wiren Board в Loxone Miniserver.
 
 Только стандартная библиотека Python 3.9+ — на контроллер ничего не ставится.
 """
+import copy
 import json
 import os
 import re
@@ -45,6 +46,7 @@ DEFAULTS = {
     "ui_password": "",         # пароль веб-интерфейса (пусто — без пароля)
     "selected": {},            # "устройство/канал" -> true
     "aliases": {},             # устройство -> имя для Loxone
+    "textvals": {},            # "устройство/канал" -> [текстовые значения для цифровых входов]
 }
 
 # Устройства, которые обычно не нужны в Loxone — в интерфейсе свёрнуты внизу
@@ -90,7 +92,9 @@ class Config:
     def __init__(self, path):
         self.path = path
         self.lock = threading.Lock()
-        self.data = dict(DEFAULTS)
+        # deepcopy: мутация вложенных dict/list одного экземпляра не должна
+        # менять DEFAULTS и другие экземпляры Config
+        self.data = copy.deepcopy(DEFAULTS)
         try:
             with open(path, encoding="utf-8") as f:
                 self.data.update(json.load(f))
@@ -386,6 +390,45 @@ def to_loxone(ctype, value):
         return None
 
 
+# Текстовые значения → цифровые входы Loxone: мост шлёт wb.<устройство>.<канал>=<текст>,
+# виртуальный UDP-вход матчит строку целиком (как пульт ИК).
+TEXT_SEEDS = [
+    # (подстроки в id канала, типовые значения — чтобы шаблон знал их заранее)
+    (("action",), ["single", "double", "triple", "hold", "release", "toggle"]),
+    (("mode", "preset"), ["off", "heat", "cool", "auto", "fan_only", "dry", "idle"]),
+    (("state", "status"), ["on", "off", "open", "close", "opening", "closing", "stop", "stopped"]),
+]
+TEXT_RE = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_\-]{0,31}$")
+
+
+def text_value(value):
+    """Текст WB → строка для UDP; None — не отправлять (пустое/слишком странное)."""
+    if value is None:
+        return None
+    v = safe_id(str(value).strip())
+    return v if v and TEXT_RE.match(v) else None
+
+
+def text_values_for(cfg, d, c):
+    """Все известные значения текстового канала: запомненные мостом + типовые по имени канала."""
+    vals = list(cfg["textvals"].get(d + "/" + c, []))
+    low = c.lower()
+    for keys, seed in TEXT_SEEDS:
+        if any(k in low for k in keys):
+            for v in seed:
+                if v not in vals:
+                    vals.append(v)
+    return vals
+
+
+def send_value(ctype, value):
+    """Что отправить в Loxone: число (любой канал) или текст (только текстовые каналы)."""
+    v = to_loxone(ctype, value)
+    if v is not None:
+        return v
+    return text_value(value) if ctype == "text" else None
+
+
 def from_loxone(meta, raw):
     """Значение из URL Loxone → полезная нагрузка для /on."""
     t = Model.ctype(meta)
@@ -443,9 +486,11 @@ class Bridge:
         t = Model.ctype(meta)
         if not Model.readable(meta):
             return
-        v = to_loxone(t, value)
+        v = send_value(t, value)
         if v is None:
             return
+        if t == "text" and to_loxone(t, value) is None:
+            self.learn_text(d, c, value)
         key = d + "/" + c
         thr = 0 if t in BINARY_TYPES else self.cfg["throttle_ms"] / 1000.0
         now = time.time()
@@ -458,6 +503,15 @@ class Bridge:
                 self.pending[key] = v
                 return
         self.send(d, c, v)
+
+    def learn_text(self, d, c, value):
+        """Новое текстовое значение канала — запомнить, чтобы появилось в шаблоне."""
+        key = d + "/" + c
+        vals = self.cfg["textvals"].setdefault(key, [])
+        if value not in vals:
+            vals.append(value)
+            self.cfg.save()
+            log("текст: %s = %s (в шаблоне появится новый вход)" % (key, value))
 
     def send(self, d, c, v):
         ms = self.cfg["miniserver"]
@@ -495,7 +549,7 @@ class Bridge:
                      for c, x in dv["controls"].items()]
         for d, c, meta, value in items:
             if self.selected(d, c) and Model.readable(meta):
-                v = to_loxone(Model.ctype(meta), value)
+                v = send_value(Model.ctype(meta), value)
                 if v is not None:
                     self.send(d, c, v)
                     n += 1
@@ -719,12 +773,14 @@ def dev_name(cfg, d, dv):
     return cfg["aliases"].get(d) or title_of(dv["meta"], d)
 
 
-def input_ok(ctl):
+def input_ok(cfg, d, c, ctl):
     m = ctl["meta"]
     if not Model.readable(m):
         return False
-    # строка вроде action=single — числом в Loxone не передать
-    return not (Model.ctype(m) == "text" and to_loxone("text", ctl["value"]) is None)
+    if to_loxone(Model.ctype(m), ctl["value"]) is not None:
+        return True
+    # строка вроде action=single — в Loxone идёт цифровым входом на значение
+    return Model.ctype(m) == "text" and bool(text_values_for(cfg, d, c))
 
 
 def tpl_inputs(cfg, model, bridge, dev=None, title=None):
@@ -735,10 +791,19 @@ def tpl_inputs(cfg, model, bridge, dev=None, title=None):
          % (x(title), x(bridge.local_ip()), x(bridge.local_ip()), int(cfg["udp_port"])),
          '\t<Info templateType="1" minVersion="16000610"/>']
     for d, c, dname, ctl in selected_items(cfg, model, dev):
-        if not input_ok(ctl):
-            continue
         m = ctl["meta"]
         t = Model.ctype(m)
+        if not input_ok(cfg, d, c, ctl):
+            continue
+        if t == "text" and to_loxone("text", ctl["value"]) is None:
+            # по цифровому входу на каждое известное значение; Check матчит строку целиком
+            for val in text_values_for(cfg, d, c):
+                name = "%s: %s — %s" % (title_of(m, c), val, dname)
+                o.append('\t<VirtualInUdpCmd Title="%s" Comment="%s/%s=%s" Address="" '
+                         'Check="wb.%s.%s=%s" Analog="false" DefVal="0" Unit="" HintText=""/>'
+                         % (x(name), x(d), x(c), x(val),
+                            x(safe_id(d)), x(safe_id(c)), x(safe_id(val))))
+            continue
         unit = Model.unit(m)
         if t in BINARY_TYPES or t == "rgb":
             u = "<v>"
@@ -787,7 +852,7 @@ def tpl_outputs(cfg, model, bridge, dev=None, title=None):
 def tpl_counts(cfg, model, dev, snap=None):
     """Сколько каналов устройства попадёт во вход и в выход."""
     items = selected_items(cfg, model, dev, snap)
-    return (sum(1 for it in items if input_ok(it[3])),
+    return (sum(1 for it in items if input_ok(cfg, it[0], it[1], it[3])),
             sum(1 for it in items if Model.writable(it[3]["meta"])))
 
 
@@ -948,6 +1013,9 @@ def make_handler(cfg, model, bridge):
                         "num": ctl["value"] is None or to_loxone(Model.ctype(m), ctl["value"]) is not None,
                         "error": m.get("error", ""), "min": m.get("min"), "max": m.get("max"),
                     })
+                    if Model.ctype(m) == "text":
+                        ctrls[-1]["tsend"] = text_value(ctl["value"]) is not None
+                        ctrls[-1]["tvals"] = text_values_for(cfg, d, c)
                 if not ctrls:
                     continue
                 n_in, n_out = tpl_counts(cfg, model, d, snap)

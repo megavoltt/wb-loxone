@@ -48,6 +48,7 @@ Modbus makes awkward:
 | Templates | register addresses by hand | assembled automatically, per device |
 | Zigbee, wb-rules, 1-Wire | register map configuration required | anything that exists in MQTT |
 | Names | register numbers | channel and device names from WB |
+| Text: modes, statuses, button actions | can't be sent | one digital input per value |
 
 The two can be used together: outputs over Modbus, inputs and buttons over
 the bridge.

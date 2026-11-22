@@ -210,6 +210,7 @@ ru: {
   viu_title:     "Виртуальный вход UDP: {n} кан.",
   vo_title:      "Виртуальный выход HTTP: {n} кан.",
   dir_text:      "текст — не передаётся",
+  tvals_tip:     "значения для шаблона Loxone",
   dir_io:        "⇄ вход и выход",
   dir_out:       "← выход",
   dir_in:        "→ вход",
@@ -291,6 +292,7 @@ en: {
   viu_title:     "Virtual UDP input: {n} ch.",
   vo_title:      "Virtual HTTP output: {n} ch.",
   dir_text:      "text — not sent",
+  tvals_tip:     "values in the Loxone template",
   dir_io:        "⇄ input and output",
   dir_out:       "← output",
   dir_in:        "→ input",
@@ -363,7 +365,7 @@ async function newKey(){
 }
 async function resync(){ const n = await api("api/resync"); toast(t("resent",{n})) }
 
-function dirOf(c){ if(c.r && !c.w && !c.num) return ["out",t("dir_text")]; return c.r && c.w ? ["io",t("dir_io")] : c.w ? ["out",t("dir_out")] : ["in",t("dir_in")] }
+function dirOf(c){ if(c.r && !c.w && !c.num) return c.tsend ? ["in",t("dir_in")] : ["out",t("dir_text")]; return c.r && c.w ? ["io",t("dir_io")] : c.w ? ["out",t("dir_out")] : ["in",t("dir_in")] }
 function fmt(c){
   if(c.value==null) return "—";
   if(c.type==="event") return c.value==="1" ? '<b style="color:var(--acc)">'+t("val_press")+'</b>' : '<span style="color:var(--mute)">'+t("val_waiting")+'</span>';
@@ -415,7 +417,7 @@ function devHtml(d){
     <table><tr><th></th><th>${t("th_channel")}</th><th class="mono">ID</th><th>${t("th_type")}</th><th>${t("th_value")}</th><th>${t("th_dir")}</th><th></th></tr>
     ${d.controls.map(c=>{const [k,txt]=dirOf(c);return `<tr data-q="${esc((c.title+" "+c.id).toLowerCase())}">
       <td><label class="sw"><input type="checkbox" ${isSel(d.id,c.id)?"checked":""} onchange="selOne('${esc(d.id)}','${esc(c.id)}',this.checked)"><span></span></label></td>
-      <td>${esc(c.title)}</td><td class="mono">${esc(c.id)}</td><td class="mono" style="display:table-cell">${esc(c.type)}</td>
+      <td>${esc(c.title)}${c.tvals&&c.tvals.length?` <span class="mono" style="font-size:11px;color:var(--mute)" title="${t("tvals_tip")}">${c.tvals.map(v=>esc(v)).join(" · ")}</span>`:""}</td><td class="mono">${esc(c.id)}</td><td class="mono" style="display:table-cell">${esc(c.type)}</td>
       <td class="v ${c.error?"err":""}" id="v-${esc(d.id)}-${esc(c.id)}">${fmt(c)}</td>
       <td><span class="dir ${k}">${txt}</span></td><td>${ctrlTest(d.id,c)}</td></tr>`}).join("")}
     </table>
