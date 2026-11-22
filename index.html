@@ -15,6 +15,7 @@ header h1 b{color:var(--acc)}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
 .chip{background:var(--chip);border-radius:20px;padding:3px 10px;font-size:12px;color:var(--mute);white-space:nowrap}
 .chip.ok{color:var(--acc)}.chip.bad{color:var(--bad)}
+.langsel{font:inherit;font-size:12px;color:var(--mute);background:var(--chip);border:1px solid var(--line);border-radius:14px;padding:3px 8px;cursor:pointer}
 main{max-width:1100px;margin:0 auto;padding:16px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px}
 .card h2{font-size:15px;margin:0 0 10px}
@@ -72,65 +73,69 @@ code{background:var(--chip);padding:1px 5px;border-radius:4px;font-size:12px}
   <h1>WB <b>→</b> Loxone</h1>
   <div class="chips">
     <span class="chip" id="c-mqtt">MQTT …</span>
-    <span class="chip" id="c-sel">выбрано 0</span>
+    <span class="chip" id="c-sel"></span>
     <span class="chip" id="c-udp">UDP 0</span>
-    <span class="chip" id="c-cmd">команд 0</span>
+    <span class="chip" id="c-cmd"></span>
     <span class="chip" id="c-ver"></span>
+    <select class="langsel" id="langsel" onchange="setLang(this.value)" title="Language / Язык">
+      <option value="ru">Русский</option>
+      <option value="en">English</option>
+    </select>
   </div>
 </header>
 <main>
   <div class="card">
-    <h2>Подключение к Loxone</h2>
+    <h2 data-i18n="conn_title">Подключение к Loxone</h2>
     <div class="grid">
-      <label class="f">IP Miniserver<input type="text" id="miniserver" placeholder="192.168.1.77"></label>
-      <label class="f">Порт виртуального входа UDP<input type="number" id="udp_port"></label>
-      <label class="f">Имя блоков в Loxone Config<input type="text" id="title"></label>
-      <label class="f">Адрес WB для Loxone (пусто — авто)<input type="text" id="wb_host"></label>
-      <label class="f">Порт веб-интерфейса и команд<input type="number" id="http_port"></label>
-      <label class="f">Не чаще, мс на канал<input type="number" id="throttle_ms"></label>
-      <label class="f">Полная пересылка, с (0 — выкл.)<input type="number" id="resync_s"></label>
-      <label class="f">Ожидание след. нажатия, мс<input type="number" id="click_ms"></label>
-      <label class="f">Долгое нажатие от, мс<input type="number" id="long_ms"></label>
-      <label class="f">Пароль веб-интерфейса<input type="password" id="ui_password" placeholder="не задан" autocomplete="new-password"></label>
+      <label class="f"><span data-i18n="lb_miniserver">IP Miniserver</span><input type="text" id="miniserver" data-i18n-ph="ph_miniserver" placeholder="192.168.1.77"></label>
+      <label class="f"><span data-i18n="lb_udp_port">Порт виртуального входа UDP</span><input type="number" id="udp_port"></label>
+      <label class="f"><span data-i18n="lb_title">Имя блоков в Loxone Config</span><input type="text" id="title"></label>
+      <label class="f"><span data-i18n="lb_wb_host">Адрес WB для Loxone (пусто — авто)</span><input type="text" id="wb_host"></label>
+      <label class="f"><span data-i18n="lb_http_port">Порт веб-интерфейса и команд</span><input type="number" id="http_port"></label>
+      <label class="f"><span data-i18n="lb_throttle">Не чаще, мс на канал</span><input type="number" id="throttle_ms"></label>
+      <label class="f"><span data-i18n="lb_resync">Полная пересылка, с (0 — выкл.)</span><input type="number" id="resync_s"></label>
+      <label class="f"><span data-i18n="lb_click">Ожидание след. нажатия, мс</span><input type="number" id="click_ms"></label>
+      <label class="f"><span data-i18n="lb_long">Долгое нажатие от, мс</span><input type="number" id="long_ms"></label>
+      <label class="f"><span data-i18n="lb_password">Пароль веб-интерфейса</span><input type="password" id="ui_password" data-i18n-ph="ph_password_unset" placeholder="не задан" autocomplete="new-password"></label>
     </div>
     <div class="row" style="margin-top:12px">
-      <button class="p" onclick="saveCfg()">Сохранить</button>
-      <span class="chip">ключ команд: <b id="key"></b></span>
-      <button class="mini" onclick="newKey()">Новый ключ</button>
+      <button class="p" onclick="saveCfg()" data-i18n="save">Сохранить</button>
+      <span class="chip"><span data-i18n="key_label">ключ команд:</span> <b id="key"></b></span>
+      <button class="mini" onclick="newKey()" data-i18n="new_key">Новый ключ</button>
       <span style="flex:1"></span>
-      <a class="btn p" href="template/all.zip" title="Отдельные VIU_/VO_ для каждого устройства с выбранными каналами">Шаблоны всех устройств (ZIP)</a>
-      <a class="btn" href="template/viu.xml" title="Все выбранные каналы одним блоком">Общий VIU</a>
-      <a class="btn" href="template/vo.xml" title="Все выбранные каналы одним блоком">Общий VO</a>
-      <button onclick="resync()">Переслать значения</button>
+      <a class="btn p" href="template/all.zip" data-i18n="tpl_zip" data-i18n-title="tpl_zip_title" title="Отдельные VIU_/VO_ для каждого устройства с выбранными каналами">Шаблоны всех устройств (ZIP)</a>
+      <a class="btn" href="template/viu.xml" data-i18n="viu_common" data-i18n-title="tpl_common_title" title="Все выбранные каналы одним блоком">Общий VIU</a>
+      <a class="btn" href="template/vo.xml" data-i18n="vo_common" data-i18n-title="tpl_common_title" title="Все выбранные каналы одним блоком">Общий VO</a>
+      <button onclick="resync()" data-i18n="resend">Переслать значения</button>
     </div>
   </div>
 
   <div class="card">
     <details class="help">
-      <summary>Как подключить в Loxone Config</summary>
+      <summary data-i18n="help_title">Как подключить в Loxone Config</summary>
       <ol>
-        <li>Задайте IP Miniserver и сохраните. Отметьте ниже нужные каналы — выбор сохраняется сразу.</li>
-        <li>Шаблоны делаются <b>на каждое устройство отдельно</b>, как в MegaFlex: блок в Loxone называется именем устройства (поле «Имя в Loxone»), файлы <code>VIU_Имя.xml</code> и <code>VO_Имя.xml</code>. Скачать — кнопками VIU / VO у устройства или все сразу архивом ZIP.</li>
-        <li>Положите файлы в <code>Документы\Loxone\Loxone Config\Templates\VirtualIn</code> (VIU_) и <code>…\VirtualOut</code> (VO_), либо импортируйте: Периферия → Виртуальные входы → <b>Импорт шаблона</b> (и так же для Виртуальных выходов).</li>
-        <li>Перетащите нужные входы/выходы на страницу программы и сохраните в Miniserver.</li>
-        <li>Значения приходят по UDP сразу при изменении; раз в «Полную пересылку» мост повторяет все — Loxone подхватит их после перезагрузки.</li>
-        <li><b>Кнопки.</b> У каждого входа со счётчиком (<code>Input N</code> + <code>Input N counter</code>) есть каналы «одинарное», «двойное», «тройное», «долгое» — импульс 1→0. Число нажатий берётся из аппаратного счётчика модуля, поэтому короткие нажатия не теряются даже на медленной шине. Удержание для диммирования и жалюзи — обычный канал <code>Input N</code>. Одинарное приходит через «Ожидание след. нажатия» после отпускания.</li>
-        <li>RGB: выход Loxone (BBBGGGRRR, %) переводится в <code>R;G;B</code> WB автоматически. Диммеры и уставки — аналоговые выходы <code>&lt;v&gt;</code>.</li>
-        <li>После изменения выбора каналов шаблон нужно импортировать заново — Loxone добавит недостающие команды в существующий блок с тем же именем, если импортировать его поверх.</li>
+        <li data-i18n-html="help_1">Задайте IP Miniserver и сохраните. Отметьте ниже нужные каналы — выбор сохраняется сразу.</li>
+        <li data-i18n-html="help_2">Шаблоны делаются <b>на каждое устройство отдельно</b>, как в MegaFlex: блок в Loxone называется именем устройства (поле «Имя в Loxone»), файлы <code>VIU_Имя.xml</code> и <code>VO_Имя.xml</code>. Скачать — кнопками VIU / VO у устройства или все сразу архивом ZIP.</li>
+        <li data-i18n-html="help_3">Положите файлы в <code>Документы\Loxone\Loxone Config\Templates\VirtualIn</code> (VIU_) и <code>…\VirtualOut</code> (VO_), либо импортируйте: Периферия → Виртуальные входы → <b>Импорт шаблона</b> (и так же для Виртуальных выходов).</li>
+        <li data-i18n-html="help_4">Перетащите нужные входы/выходы на страницу программы и сохраните в Miniserver.</li>
+        <li data-i18n-html="help_5">Значения приходят по UDP сразу при изменении; раз в «Полную пересылку» мост повторяет все — Loxone подхватит их после перезагрузки.</li>
+        <li data-i18n-html="help_6"><b>Кнопки.</b> У каждого входа со счётчиком (<code>Input N</code> + <code>Input N counter</code>) есть каналы «одинарное», «двойное», «тройное», «долгое» — импульс 1→0. Число нажатий берётся из аппаратного счётчика модуля, поэтому короткие нажатия не теряются даже на медленной шине. Удержание для диммирования и жалюзи — обычный канал <code>Input N</code>. Одинарное приходит через «Ожидание след. нажатия» после отпускания.</li>
+        <li data-i18n-html="help_7">RGB: выход Loxone (BBBGGGRRR, %) переводится в <code>R;G;B</code> WB автоматически. Диммеры и уставки — аналоговые выходы <code>&lt;v&gt;</code>.</li>
+        <li data-i18n-html="help_8">После изменения выбора каналов шаблон нужно импортировать заново — Loxone добавит недостающие команды в существующий блок с тем же именем, если импортировать его поверх.</li>
       </ol>
-      <p style="color:var(--mute)">Команды Loxone приходят на <code>http://WB:порт/set/ключ/устройство/канал/значение</code>. Без верного ключа и для невыбранных каналов команды отклоняются.</p>
+      <p style="color:var(--mute)"><span data-i18n="help_foot_pre">Команды Loxone приходят на</span> <code>http://WB:порт/set/ключ/устройство/канал/значение</code><span data-i18n="help_foot_post">. Без верного ключа и для невыбранных каналов команды отклоняются.</span></p>
     </details>
   </div>
 
   <div class="toolbar">
-    <input type="text" id="q" placeholder="Поиск устройства или канала…" oninput="applyFilter()">
-    <label class="row" style="gap:6px"><input type="checkbox" id="onlySel" onchange="applyFilter()"> только выбранные</label>
+    <input type="text" id="q" data-i18n-ph="search_ph" placeholder="Поиск устройства или канала…" oninput="applyFilter()">
+    <label class="row" style="gap:6px"><input type="checkbox" id="onlySel" onchange="applyFilter()"> <span data-i18n="only_selected">только выбранные</span></label>
     <span style="flex:1"></span>
-    <button class="mini" onclick="openAll(true)">Развернуть всё</button>
-    <button class="mini" onclick="openAll(false)">Свернуть</button>
+    <button class="mini" onclick="openAll(true)" data-i18n="expand_all">Развернуть всё</button>
+    <button class="mini" onclick="openAll(false)" data-i18n="collapse_all">Свернуть</button>
   </div>
   <div id="devs"></div>
-  <div class="sys-h" id="sysh" hidden>Системные устройства</div>
+  <div class="sys-h" id="sysh" hidden data-i18n="sys_devices">Системные устройства</div>
   <div id="sys"></div>
 </main>
 <div id="toast"></div>
@@ -138,6 +143,200 @@ code{background:var(--chip);padding:1px 5px;border-radius:4px;font-size:12px}
 let S = null, sig = "", opened = new Set(JSON.parse(localStorageGet("open") || "[]"));
 function localStorageGet(k){try{return localStorage.getItem("wblox."+k)}catch(e){return null}}
 function localStorageSet(k,v){try{localStorage.setItem("wblox."+k,v)}catch(e){}}
+
+// ---------------------------------------------------------------- i18n ---
+// Словари интерфейса. Новые языки — новый ключ в I18N + option в #langsel.
+// Незаполненные ключи падают на русский (I18N.ru).
+const I18N = {
+ru: {
+  selected:      "выбрано {n}",
+  commands:      "команд {n}",
+  mqtt_ok:       "MQTT подключён",
+  mqtt_bad:      "MQTT нет связи",
+  bridge_down:   "нет связи с мостом",
+  udp_to:        "UDP → {host}:{n}",
+  not_set:       "не задан",
+
+  conn_title:    "Подключение к Loxone",
+  lb_miniserver: "IP Miniserver",
+  ph_miniserver: "192.168.1.77",
+  lb_udp_port:   "Порт виртуального входа UDP",
+  lb_title:      "Имя блоков в Loxone Config",
+  lb_wb_host:    "Адрес WB для Loxone (пусто — авто)",
+  lb_http_port:  "Порт веб-интерфейса и команд",
+  lb_throttle:   "Не чаще, мс на канал",
+  lb_resync:     "Полная пересылка, с (0 — выкл.)",
+  lb_click:      "Ожидание след. нажатия, мс",
+  lb_long:       "Долгое нажатие от, мс",
+  lb_password:   "Пароль веб-интерфейса",
+  ph_password_set:   "задан — введите новый, чтобы сменить",
+  ph_password_unset: "не задан",
+  save:          "Сохранить",
+  key_label:     "ключ команд:",
+  new_key:       "Новый ключ",
+  tpl_zip:       "Шаблоны всех устройств (ZIP)",
+  tpl_zip_title: "Отдельные VIU_/VO_ для каждого устройства с выбранными каналами",
+  viu_common:    "Общий VIU",
+  vo_common:     "Общий VO",
+  tpl_common_title: "Все выбранные каналы одним блоком",
+  resend:        "Переслать значения",
+
+  help_title:    "Как подключить в Loxone Config",
+  help_1:        "Задайте IP Miniserver и сохраните. Отметьте ниже нужные каналы — выбор сохраняется сразу.",
+  help_2:        "Шаблоны делаются <b>на каждое устройство отдельно</b>, как в MegaFlex: блок в Loxone называется именем устройства (поле «Имя в Loxone»), файлы <code>VIU_Имя.xml</code> и <code>VO_Имя.xml</code>. Скачать — кнопками VIU / VO у устройства или все сразу архивом ZIP.",
+  help_3:        "Положите файлы в <code>Документы\\Loxone\\Loxone Config\\Templates\\VirtualIn</code> (VIU_) и <code>…\\VirtualOut</code> (VO_), либо импортируйте: Периферия → Виртуальные входы → <b>Импорт шаблона</b> (и так же для Виртуальных выходов).",
+  help_4:        "Перетащите нужные входы/выходы на страницу программы и сохраните в Miniserver.",
+  help_5:        "Значения приходят по UDP сразу при изменении; раз в «Полную пересылку» мост повторяет все — Loxone подхватит их после перезагрузки.",
+  help_6:        "<b>Кнопки.</b> У каждого входа со счётчиком (<code>Input N</code> + <code>Input N counter</code>) есть каналы «одинарное», «двойное», «тройное», «долгое» — импульс 1→0. Число нажатий берётся из аппаратного счётчика модуля, поэтому короткие нажатия не теряются даже на медленной шине. Удержание для диммирования и жалюзи — обычный канал <code>Input N</code>. Одинарное приходит через «Ожидание след. нажатия» после отпускания.",
+  help_7:        "RGB: выход Loxone (BBBGGGRRR, %) переводится в <code>R;G;B</code> WB автоматически. Диммеры и уставки — аналоговые выходы <code>&lt;v&gt;</code>.",
+  help_8:        "После изменения выбора каналов шаблон нужно импортировать заново — Loxone добавит недостающие команды в существующий блок с тем же именем, если импортировать его поверх.",
+  help_foot_pre: "Команды Loxone приходят на",
+  help_foot_post: ". Без верного ключа и для невыбранных каналов команды отклоняются.",
+
+  search_ph:     "Поиск устройства или канала…",
+  only_selected: "только выбранные",
+  expand_all:    "Развернуть всё",
+  collapse_all:  "Свернуть",
+  sys_devices:   "Системные устройства",
+
+  all_channels:  "все каналы",
+  alias_label:   "Имя в Loxone",
+  th_channel:    "Канал",
+  th_type:       "Тип",
+  th_value:      "Значение",
+  th_dir:        "Направление",
+  tpl_cnt:       "Шаблон в Loxone: {a} из {b}",
+  channels_cnt:  "каналов: {n}",
+  viu_title:     "Виртуальный вход UDP: {n} кан.",
+  vo_title:      "Виртуальный выход HTTP: {n} кан.",
+  dir_text:      "текст — не передаётся",
+  dir_io:        "⇄ вход и выход",
+  dir_out:       "← выход",
+  dir_in:        "→ вход",
+  val_press:     "● нажатие",
+  val_waiting:   "ожидание",
+  val_on:        "вкл",
+  val_off:       "выкл",
+
+  saved:         "Сохранено",
+  port_changed:  "Порт изменится после перезапуска службы",
+  error:         "Ошибка: {m}",
+  confirm_key:   "Сменить ключ? Шаблон VO придётся импортировать в Loxone заново.",
+  key_set:       "Новый ключ задан",
+  resent:        "Отправлено значений: {n}",
+  rejected:      "Отклонено: {m}",
+  alias_saved:   "Имя сохранено",
+  prompt_value:  "Значение для ",
+  prompt_rgb:    " (R;G;B)"
+},
+en: {
+  selected:      "selected: {n}",
+  commands:      "commands: {n}",
+  mqtt_ok:       "MQTT connected",
+  mqtt_bad:      "MQTT no link",
+  bridge_down:   "bridge unreachable",
+  udp_to:        "UDP → {host}:{n}",
+  not_set:       "not set",
+
+  conn_title:    "Loxone connection",
+  lb_miniserver: "Miniserver IP",
+  ph_miniserver: "192.168.1.77",
+  lb_udp_port:   "Virtual UDP input port",
+  lb_title:      "Block name in Loxone Config",
+  lb_wb_host:    "WB address for Loxone (empty — auto)",
+  lb_http_port:  "Web UI and commands port",
+  lb_throttle:   "Min interval, ms per channel",
+  lb_resync:     "Full resend, s (0 — off)",
+  lb_click:      "Next-click wait, ms",
+  lb_long:       "Long press from, ms",
+  lb_password:   "Web UI password",
+  ph_password_set:   "set — enter a new one to change",
+  ph_password_unset: "not set",
+  save:          "Save",
+  key_label:     "command key:",
+  new_key:       "New key",
+  tpl_zip:       "Templates for all devices (ZIP)",
+  tpl_zip_title: "Separate VIU_/VO_ per device with the selected channels",
+  viu_common:    "Common VIU",
+  vo_common:     "Common VO",
+  tpl_common_title: "All selected channels as one block",
+  resend:        "Resend values",
+
+  help_title:    "How to connect in Loxone Config",
+  help_1:        "Set the Miniserver IP and save. Tick the channels you need below — the selection is saved immediately.",
+  help_2:        "Templates are made <b>per device</b>, like in MegaFlex: the Loxone block is named after the device (the «Name in Loxone» field), files <code>VIU_Name.xml</code> and <code>VO_Name.xml</code>. Download with the VIU / VO buttons next to a device, or everything at once as a ZIP archive.",
+  help_3:        "Put the files into <code>Documents\\Loxone\\Loxone Config\\Templates\\VirtualIn</code> (VIU_) and <code>…\\VirtualOut</code> (VO_), or import them: Periphery → Virtual Inputs → <b>Import template</b> (the same for Virtual Outputs).",
+  help_4:        "Drag the inputs/outputs you need onto the program page and save to the Miniserver.",
+  help_5:        "Values arrive over UDP immediately on change; at the «Full resend» interval the bridge repeats them all — Loxone picks them up after a reboot.",
+  help_6:        "<b>Buttons.</b> Every input with a counter (<code>Input N</code> + <code>Input N counter</code>) has «single», «double», «triple» and «long» channels — a 1→0 pulse. The press count comes from the module hardware counter, so short presses are not lost even on a slow bus. Hold for dimming and blinds is the regular <code>Input N</code> channel. The single press arrives after release, delayed by «Next-click wait».",
+  help_7:        "RGB: the Loxone output (BBBGGGRRR, %) is converted to WB <code>R;G;B</code> automatically. Dimmers and setpoints are analog outputs <code>&lt;v&gt;</code>.",
+  help_8:        "After changing the channel selection the template must be imported again — Loxone adds the missing commands to the existing block with the same name when you import over it.",
+  help_foot_pre: "Loxone commands arrive at",
+  help_foot_post: ". Commands without a valid key, and for unselected channels, are rejected.",
+
+  search_ph:     "Search device or channel…",
+  only_selected: "selected only",
+  expand_all:    "Expand all",
+  collapse_all:  "Collapse all",
+  sys_devices:   "System devices",
+
+  all_channels:  "all channels",
+  alias_label:   "Name in Loxone",
+  th_channel:    "Channel",
+  th_type:       "Type",
+  th_value:      "Value",
+  th_dir:        "Direction",
+  tpl_cnt:       "Template in Loxone: {a} of {b}",
+  channels_cnt:  "channels: {n}",
+  viu_title:     "Virtual UDP input: {n} ch.",
+  vo_title:      "Virtual HTTP output: {n} ch.",
+  dir_text:      "text — not sent",
+  dir_io:        "⇄ input and output",
+  dir_out:       "← output",
+  dir_in:        "→ input",
+  val_press:     "● press",
+  val_waiting:   "waiting",
+  val_on:        "on",
+  val_off:       "off",
+
+  saved:         "Saved",
+  port_changed:  "Port changes after the service restarts",
+  error:         "Error: {m}",
+  confirm_key:   "Change the key? The VO template will have to be imported into Loxone again.",
+  key_set:       "New key set",
+  resent:        "Values sent: {n}",
+  rejected:      "Rejected: {m}",
+  alias_saved:   "Name saved",
+  prompt_value:  "Value for ",
+  prompt_rgb:    " (R;G;B)"
+}
+};
+
+let LANG = localStorageGet("lang") || (navigator.language || "ru").slice(0, 2);
+if(!I18N[LANG]) LANG = "ru";
+// Локаль строки: ключ → перевод на LANG, фолбэк на русский, фолбэк на сам ключ.
+// {name} в строке заменяется значением из params.
+const t = (k, params) => {
+  let s = (I18N[LANG] && I18N[LANG][k] != null) ? I18N[LANG][k] : (I18N.ru[k] != null ? I18N.ru[k] : k);
+  if(params) for(const name in params) s = s.split("{"+name+"}").join(params[name]);
+  return s;
+};
+function applyI18n(){
+  document.documentElement.lang = LANG;
+  document.querySelectorAll("[data-i18n]").forEach(e => e.textContent = t(e.dataset.i18n));
+  document.querySelectorAll("[data-i18n-html]").forEach(e => e.innerHTML = t(e.dataset.i18nHtml));
+  document.querySelectorAll("[data-i18n-ph]").forEach(e => e.placeholder = t(e.dataset.i18nPh));
+  document.querySelectorAll("[data-i18n-title]").forEach(e => e.title = t(e.dataset.i18nTitle));
+}
+function setLang(l){
+  LANG = I18N[l] ? l : "ru";
+  localStorageSet("lang", LANG);
+  if($("langsel")) $("langsel").value = LANG;
+  applyI18n();
+  if(S){ fillCfg(S.config); render(true); }
+}
+// ------------------------------------------------------------ /i18n ---
+
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("on"),2200)}
@@ -149,26 +348,26 @@ const CFG = ["miniserver","udp_port","title","wb_host","http_port","throttle_ms"
 function fillCfg(c){
   CFG.forEach(k=>{ if(document.activeElement!==$(k)) $(k).value = c[k] ?? "" });
   $("key").textContent = c.key;
-  $("ui_password").placeholder = c.has_password ? "задан — введите новый, чтобы сменить" : "не задан";
+  $("ui_password").placeholder = c.has_password ? t("ph_password_set") : t("ph_password_unset");
 }
 async function saveCfg(){
   const b = {}; CFG.forEach(k=>b[k]=$(k).value.trim());
   if($("ui_password").value) b.ui_password = $("ui_password").value;
-  try{ await api("api/config", b); $("ui_password").value=""; toast("Сохранено");
-    if(+b.http_port !== S.config.http_port) toast("Порт изменится после перезапуска службы");
-    load(); }catch(e){toast("Ошибка: "+e.message)}
+  try{ await api("api/config", b); $("ui_password").value=""; toast(t("saved"));
+    if(+b.http_port !== S.config.http_port) toast(t("port_changed"));
+    load(); }catch(e){toast(t("error",{m:e.message}))}
 }
 async function newKey(){
-  if(!confirm("Сменить ключ? Шаблон VO придётся импортировать в Loxone заново.")) return;
-  $("key").textContent = await api("api/newkey"); toast("Новый ключ задан");
+  if(!confirm(t("confirm_key"))) return;
+  $("key").textContent = await api("api/newkey"); toast(t("key_set"));
 }
-async function resync(){ const n = await api("api/resync"); toast("Отправлено значений: "+n) }
+async function resync(){ const n = await api("api/resync"); toast(t("resent",{n})) }
 
-function dirOf(c){ if(c.r && !c.w && !c.num) return ["out","текст — не передаётся"]; return c.r && c.w ? ["io","⇄ вход и выход"] : c.w ? ["out","← выход"] : ["in","→ вход"] }
+function dirOf(c){ if(c.r && !c.w && !c.num) return ["out",t("dir_text")]; return c.r && c.w ? ["io",t("dir_io")] : c.w ? ["out",t("dir_out")] : ["in",t("dir_in")] }
 function fmt(c){
   if(c.value==null) return "—";
-  if(c.type==="event") return c.value==="1" ? '<b style="color:var(--acc)">● нажатие</b>' : '<span style="color:var(--mute)">ожидание</span>';
-  if(c.type==="switch"||c.type==="alarm") return c.value==="1" ? "вкл" : "выкл";
+  if(c.type==="event") return c.value==="1" ? '<b style="color:var(--acc)">'+t("val_press")+'</b>' : '<span style="color:var(--mute)">'+t("val_waiting")+'</span>';
+  if(c.type==="switch"||c.type==="alarm") return c.value==="1" ? t("val_on") : t("val_off");
   if(c.type==="rgb") return '<span style="display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;background:rgb('+esc(c.value.split(";").join(","))+')"></span> '+esc(c.value);
   return esc(c.value)+(c.unit?" "+esc(c.unit):"");
 }
@@ -193,12 +392,12 @@ function overlay(){
 async function test(d,c,v){
   const ctl = S.devices.find(x=>x.id===d).controls.find(x=>x.id===c);
   if(v===null) v = ctl.value==="1" ? "0" : "1";
-  if(v==="?"){ v = prompt("Значение для "+ctl.title+(ctl.type==="rgb"?" (R;G;B)":""), ctl.value||""); if(v==null) return; }
+  if(v==="?"){ v = prompt(t("prompt_value")+ctl.title+(ctl.type==="rgb"?t("prompt_rgb"):""), ctl.value||""); if(v==null) return; }
   try{
     await api("api/test",{dev:d,ctrl:c,value:v});
     if(ctl.type!=="pushbutton"){ sent[d+"/"+c] = {v, t:Date.now()}; ctl.value = v; render(false); }
     setTimeout(load, 300);
-  }catch(e){ toast("Отклонено: "+e.message) }
+  }catch(e){ toast(t("rejected",{m:e.message})) }
 }
 function isSel(d,c){ return !!S.config.selected[d+"/"+c] }
 function devHtml(d){
@@ -206,19 +405,19 @@ function devHtml(d){
   const alias = S.config.aliases[d.id] || "";
   return `<div class="dev ${opened.has(d.id)?"open":""}" data-id="${esc(d.id)}">
   <div class="hd" onclick="toggleOpen(this.parentNode)">
-    <input type="checkbox" title="все каналы" onclick="event.stopPropagation()" onchange="selDev('${esc(d.id)}',this.checked)" ${n&&n===d.controls.length?"checked":""}>
+    <input type="checkbox" title="${t("all_channels")}" onclick="event.stopPropagation()" onchange="selDev('${esc(d.id)}',this.checked)" ${n&&n===d.controls.length?"checked":""}>
     <span class="t">${esc(alias||d.title)}</span><span class="id">${esc(d.id)}</span>
-    <span class="cnt ${n?"on":""}" id="cnt-${esc(d.id)}">${n?("Шаблон в Loxone "+n+" из "+d.controls.length):(d.controls.length+" каналов")}</span>
-    <span class="tpl" onclick="event.stopPropagation()">${d.n_in?`<a href="template/viu.xml?dev=${encodeURIComponent(d.id)}" title="Виртуальный вход UDP: ${d.n_in} кан.">VIU</a>`:""}${d.n_out?`<a href="template/vo.xml?dev=${encodeURIComponent(d.id)}" title="Виртуальный выход HTTP: ${d.n_out} кан.">VO</a>`:""}</span>
+    <span class="cnt ${n?"on":""}" id="cnt-${esc(d.id)}">${n?t("tpl_cnt",{a:n,b:d.controls.length}):t("channels_cnt",{n:d.controls.length})}</span>
+    <span class="tpl" onclick="event.stopPropagation()">${d.n_in?`<a href="template/viu.xml?dev=${encodeURIComponent(d.id)}" title="${t("viu_title",{n:d.n_in})}">VIU</a>`:""}${d.n_out?`<a href="template/vo.xml?dev=${encodeURIComponent(d.id)}" title="${t("vo_title",{n:d.n_out})}">VO</a>`:""}</span>
   </div>
   <div class="bd">
-    <div class="alias">Имя в Loxone <input type="text" value="${esc(alias)}" placeholder="${esc(d.title)}" onchange="setAlias('${esc(d.id)}',this.value)"></div>
-    <table><tr><th></th><th>Канал</th><th class="mono">ID</th><th>Тип</th><th>Значение</th><th>Направление</th><th></th></tr>
-    ${d.controls.map(c=>{const [k,t]=dirOf(c);return `<tr data-q="${esc((c.title+" "+c.id).toLowerCase())}">
+    <div class="alias">${t("alias_label")} <input type="text" value="${esc(alias)}" placeholder="${esc(d.title)}" onchange="setAlias('${esc(d.id)}',this.value)"></div>
+    <table><tr><th></th><th>${t("th_channel")}</th><th class="mono">ID</th><th>${t("th_type")}</th><th>${t("th_value")}</th><th>${t("th_dir")}</th><th></th></tr>
+    ${d.controls.map(c=>{const [k,txt]=dirOf(c);return `<tr data-q="${esc((c.title+" "+c.id).toLowerCase())}">
       <td><label class="sw"><input type="checkbox" ${isSel(d.id,c.id)?"checked":""} onchange="selOne('${esc(d.id)}','${esc(c.id)}',this.checked)"><span></span></label></td>
       <td>${esc(c.title)}</td><td class="mono">${esc(c.id)}</td><td class="mono" style="display:table-cell">${esc(c.type)}</td>
       <td class="v ${c.error?"err":""}" id="v-${esc(d.id)}-${esc(c.id)}">${fmt(c)}</td>
-      <td><span class="dir ${k}">${t}</span></td><td>${ctrlTest(d.id,c)}</td></tr>`}).join("")}
+      <td><span class="dir ${k}">${txt}</span></td><td>${ctrlTest(d.id,c)}</td></tr>`}).join("")}
     </table>
   </div></div>`;
 }
@@ -228,7 +427,7 @@ function openAll(on){ document.querySelectorAll(".dev").forEach(e=>{e.classList.
 async function pushSel(){ await api("api/config",{selected:S.config.selected}); render(true); }
 function selOne(d,c,on){ on?S.config.selected[d+"/"+c]=true:delete S.config.selected[d+"/"+c]; pushSel() }
 function selDev(d,on){ S.devices.find(x=>x.id===d).controls.forEach(c=>on?S.config.selected[d+"/"+c.id]=true:delete S.config.selected[d+"/"+c.id]); pushSel() }
-async function setAlias(d,v){ v=v.trim(); v?S.config.aliases[d]=v:delete S.config.aliases[d]; await api("api/config",{aliases:S.config.aliases}); render(true); toast("Имя сохранено") }
+async function setAlias(d,v){ v=v.trim(); v?S.config.aliases[d]=v:delete S.config.aliases[d]; await api("api/config",{aliases:S.config.aliases}); render(true); toast(t("alias_saved")) }
 
 function render(force){
   const s = JSON.stringify(S.devices.map(d=>[d.id,d.controls.map(c=>c.id)]));
@@ -242,11 +441,11 @@ function render(force){
     S.devices.forEach(d=>d.controls.forEach(c=>{ const e=$("v-"+d.id+"-"+c.id); if(e){ const h=fmt(c); if(e.innerHTML!==h) e.innerHTML=h; e.classList.toggle("err",!!c.error) } }));
   }
   const n = Object.keys(S.config.selected).length;
-  $("c-sel").textContent = "выбрано "+n;
-  $("c-mqtt").textContent = S.mqtt ? "MQTT подключён" : "MQTT нет связи"; $("c-mqtt").className = "chip "+(S.mqtt?"ok":"bad");
-  $("c-udp").textContent = "UDP → "+(S.config.miniserver||"не задан")+": "+S.stats.udp;
+  $("c-sel").textContent = t("selected",{n});
+  $("c-mqtt").textContent = S.mqtt ? t("mqtt_ok") : t("mqtt_bad"); $("c-mqtt").className = "chip "+(S.mqtt?"ok":"bad");
+  $("c-udp").textContent = t("udp_to",{host:S.config.miniserver||t("not_set"),n:S.stats.udp});
   $("c-udp").className = "chip "+(S.config.miniserver?"":"bad");
-  $("c-cmd").textContent = "команд "+S.stats.cmd; $("c-cmd").title = S.stats.last_cmd||"";
+  $("c-cmd").textContent = t("commands",{n:S.stats.cmd}); $("c-cmd").title = S.stats.last_cmd||"";
   $("c-ver").textContent = "v"+S.version;
 }
 function applyFilter(){
@@ -268,8 +467,11 @@ async function load(){
   try{
     const r = await fetch("api/state",{cache:"no-store"}); S = await r.json(); overlay();
     fillCfg(S.config); render(false);
-  }catch(e){ $("c-mqtt").textContent="нет связи с мостом"; $("c-mqtt").className="chip bad" }
+  }catch(e){ $("c-mqtt").textContent=t("bridge_down"); $("c-mqtt").className="chip bad";
+    $("c-sel").textContent=t("selected",{n:0}); $("c-cmd").textContent=t("commands",{n:0}) }
 }
+if($("langsel")) $("langsel").value = LANG;
+applyI18n();
 load(); setInterval(load, 1000);
 </script>
 </body>
