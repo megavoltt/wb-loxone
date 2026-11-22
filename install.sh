@@ -1,7 +1,13 @@
 #!/bin/sh
 # Установка и обновление моста WB → Loxone на контроллере Wiren Board.
 #
-#   wget -qO- https://raw.githubusercontent.com/megavoltt/wb-loxone/main/install.sh | sh
+#   wget https://raw.githubusercontent.com/megavoltt/wb-loxone/main/install.sh
+#   sh install.sh
+#
+# Если raw.githubusercontent.com недоступен, скачайте скрипт с зеркала и
+# укажите его как базу для остальных файлов:
+#   wget https://cdn.jsdelivr.net/gh/megavoltt/wb-loxone@main/install.sh
+#   WBLOX_URL=https://cdn.jsdelivr.net/gh/megavoltt/wb-loxone@main sh install.sh
 #
 # Код и настройки — в /mnt/data: переживают обновление прошивки. В корневой ФС
 # только файл службы; после перепрошивки FIT запустить установку ещё раз.
@@ -24,12 +30,12 @@ if [ -n "$SRC" ] && [ -f "$SRC/wbloxone.py" ] && [ -f "$SRC/index.html" ]; then
     fi
     echo "Файлы взяты из $SRC"
 else
-    URL=https://raw.githubusercontent.com/$REPO/$BRANCH
+    URL=${WBLOX_URL:-https://raw.githubusercontent.com/$REPO/$BRANCH}
     for f in $FILES; do
         wget -qO "$DIR/$f.new" "$URL/$f" || { echo "Не скачался $URL/$f"; rm -f "$DIR"/*.new; exit 1; }
     done
     for f in $FILES; do mv "$DIR/$f.new" "$DIR/$f"; done
-    echo "Файлы скачаны с github.com/$REPO ($BRANCH)"
+    echo "Файлы скачаны с $URL"
 fi
 chmod +x "$DIR/wbloxone.py" "$DIR/install.sh"
 
