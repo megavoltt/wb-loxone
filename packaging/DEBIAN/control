@@ -1,0 +1,14 @@
+Package: wb-loxone
+Version: @VERSION@
+Architecture: all
+Depends: python3:any, mosquitto
+Section: utils
+Priority: optional
+Maintainer: MegaVolt <https://github.com/megavoltt>
+Homepage: https://github.com/megavoltt/wb-loxone
+Description: Мост устройств Wiren Board в Loxone Miniserver
+ Пробрасывает устройства Wiren Board (реле, входы, датчики, Zigbee,
+ виртуальные устройства wb-rules) в Loxone Miniserver: состояния — по UDP,
+ команды — по HTTP, готовые шаблоны виртуальных входов/выходов для
+ Loxone Config. Веб-интерфейс выбора каналов на порту 8099.
+ Код и настройки — в /mnt/data, переживают обновление прошивки.
