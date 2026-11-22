@@ -58,7 +58,17 @@ the bridge.
 On the Wiren Board controller, as root:
 
 ```bash
-wget -qO- https://raw.githubusercontent.com/megavoltt/wb-loxone/main/install.sh | sh
+wget https://raw.githubusercontent.com/megavoltt/wb-loxone/main/install.sh
+sh install.sh
+```
+
+You can open the downloaded `install.sh` and inspect it before running. If
+`raw.githubusercontent.com` is unreachable from your network, use the CDN
+mirror:
+
+```bash
+wget https://cdn.jsdelivr.net/gh/megavoltt/wb-loxone@main/install.sh
+WBLOX_URL=https://cdn.jsdelivr.net/gh/megavoltt/wb-loxone@main sh install.sh
 ```
 
 At the end the installer shows the web UI address — by default
@@ -67,8 +77,9 @@ At the end the installer shows the web UI address — by default
 Re-running the same command updates the bridge. Settings and channel
 selection are preserved.
 
-Requirements: Wiren Board 7 or 8 with a current firmware (tested on wb-2602,
-Debian 11, Python 3.9), Loxone Miniserver Gen1 or Gen2, Loxone Config 16+.
+Requirements: Wiren Board 7 or 8 with a current firmware (tested on wb-2602
+and wb-2609: Debian 11–13, Python 3.9–3.13), Loxone Miniserver Gen1 or Gen2,
+Loxone Config 16+.
 
 ## First five minutes
 
