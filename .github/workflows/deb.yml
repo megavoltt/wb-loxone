@@ -1,7 +1,7 @@
 name: deb
 
 # Сборка .deb по тегу v* и публикация apt-репозитория на ветку apt
-# (сервится через GitHub Pages: https://megavoltt.github.io/wb-loxone/apt/).
+# (сервится через GitHub Pages: https://megavoltt.github.io/wb-loxone/).
 # Ручной запуск (workflow_dispatch) — для проверки: версия берётся из ввода
 # или из последнего тега, к релизу .deb не прикрепляется.
 
@@ -70,11 +70,14 @@ jobs:
           cd "$RUNNER_TEMP"
           git clone --depth 1 "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" apt-repo
           cd apt-repo
-          git checkout apt 2>/dev/null || git checkout --orphan apt
+          # depth-1 клон не содержит ветку apt — дотягиваем её явно,
+          # иначе checkout падает в --orphan и push отклоняется (non-fast-forward)
+          git fetch --depth 1 origin apt && git checkout apt || git checkout --orphan apt
           git rm -rf . >/dev/null 2>&1 || true
           cp "$GITHUB_WORKSPACE/$DEB" .
           dpkg-scanpackages . /dev/null > Packages
-          gzip -9c Packages > Packages.gz
+          # Packages.gz намеренно не создаём: apt кэширует .gz дольше,
+          # несжатый Packages надёжнее (см. историю ветки apt)
           git add -A
           git commit -m "apt: wb-loxone ${{ steps.ver.outputs.version }}"
           git push origin HEAD:apt
