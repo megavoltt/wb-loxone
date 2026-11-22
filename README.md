@@ -55,7 +55,16 @@ wb-rules — всё, что контроллер публикует в MQTT.
 На контроллере Wiren Board, под root:
 
 ```bash
-wget -qO- https://raw.githubusercontent.com/megavoltt/wb-loxone/main/install.sh | sh
+wget https://raw.githubusercontent.com/megavoltt/wb-loxone/main/install.sh
+sh install.sh
+```
+
+Скачанный `install.sh` можно открыть и проверить перед запуском. Если
+`raw.githubusercontent.com` недоступен из вашей сети — используйте зеркало:
+
+```bash
+wget https://cdn.jsdelivr.net/gh/megavoltt/wb-loxone@main/install.sh
+WBLOX_URL=https://cdn.jsdelivr.net/gh/megavoltt/wb-loxone@main sh install.sh
 ```
 
 В конце установщик покажет адрес веб-интерфейса — по умолчанию
@@ -64,8 +73,9 @@ wget -qO- https://raw.githubusercontent.com/megavoltt/wb-loxone/main/install.sh 
 Повторный запуск той же команды обновляет мост. Настройки и выбор каналов
 сохраняются.
 
-Требования: Wiren Board 7 или 8 с актуальной прошивкой (проверено на wb-2602,
-Debian 11, Python 3.9), Loxone Miniserver Gen1 или Gen2, Loxone Config 16 и новее.
+Требования: Wiren Board 7 или 8 с актуальной прошивкой (проверено на wb-2602
+и wb-2609: Debian 11–13, Python 3.9–3.13), Loxone Miniserver Gen1 или Gen2,
+Loxone Config 16 и новее.
 
 ## Первые пять минут
 
