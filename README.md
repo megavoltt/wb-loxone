@@ -156,7 +156,7 @@ systemctl disable --now wb-loxone && rm -rf /etc/systemd/system/wb-loxone.servic
 ## Поддержать
 
 Проект развивается в свободное время. Если мост экономит вам часы настройки —
-можно поддержать его на [Boosty](https://boosty.to/megavolt): разовый донат
+можно поддержать его на [Boosty](https://boosty.to/sagos): разовый донат
 или подписка. Деньги уходят на тестовое оборудование (модули Wiren Board,
 узлы Loxone) и развитие проекта.
 
