@@ -1,0 +1,9 @@
+#!/bin/sh
+# wb-loxone: перед удалением пакета остановить службу
+set -e
+case "$1" in
+    remove)
+        systemctl disable --now wb-loxone.service >/dev/null 2>&1 || true
+        ;;
+esac
+exit 0
