@@ -489,7 +489,7 @@ class Bridge:
         v = send_value(t, value)
         if v is None:
             return
-        if t == "text" и to_loxone(t, value) is None:
+        if t == "text" and to_loxone(t, value) is None:
             self.learn_text(d, c, value)
         key = d + "/" + c
         thr = 0 if t in BINARY_TYPES else self.cfg["throttle_ms"] / 1000.0
@@ -932,7 +932,7 @@ def make_handler(cfg, model, bridge):
             return False
 
         def do_GET(self):
-            path = urllib.parse.urlsplit(self.path).path
+            path = urllib.parse.ysplit(self.path).path
             parts = [urllib.parse.unquote(p) for p in path.split("/")]
             # Команды Loxone: /set/<ключ>/<устройство>/<канал>/<значение> — по ключу, без пароля
             if len(parts) >= 6 and parts[1] == "set":
