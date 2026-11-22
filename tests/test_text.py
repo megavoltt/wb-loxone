@@ -80,6 +80,33 @@ class Learning(unittest.TestCase):
         cfg2 = wl.Config(os.path.join(r.tmp.name, "cfg.json"))
         self.assertEqual(cfg2["textvals"]["%s/%s" % (DEV, CH)], ["double"])
 
+    def test_repeat_same_value_is_new_event(self):
+        # два одинаковых нажатия подряд (action zigbee2mqtt не меняется) —
+        # оба должны уйти в Loxone
+        r = Rig()
+        r.put("single")
+        r.put("single")
+        sent = [s for s in r.sent if s.endswith("=single")]
+        self.assertEqual(len(sent), 2)
+
+    def test_numeric_repeat_not_duplicated(self):
+        # числовые каналы по-прежнему шлются только при изменении
+        r = Rig(meta='{"type":"value","readonly":true}')
+        r.put("84")
+        r.put("84")
+        self.assertEqual(len(r.sent), 1)
+
+    def test_text_events_bypass_throttle(self):
+        # быстрые события на одном канале не ждут окна троттлинга
+        # и не затирают друг друга
+        r = Rig()
+        r.cfg.update({"throttle_ms": 500})
+        r.put("single")
+        r.put("double")
+        r.put("triple")
+        self.assertEqual(r.sent, ["%s/%s=%s" % (DEV, CH, v)
+                                  for v in ("single", "double", "triple")])
+
     def test_seeds_by_channel_name(self):
         r = Rig(CH and "mode")
         r.model.handle("/devices/%s/controls/%s/meta" % (DEV, "mode"),
