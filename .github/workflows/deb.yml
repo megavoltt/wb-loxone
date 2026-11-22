@@ -1,0 +1,80 @@
+name: deb
+
+# Сборка .deb по тегу v* и публикация apt-репозитория на ветку apt
+# (сервится через GitHub Pages: https://megavoltt.github.io/wb-loxone/apt/).
+# Ручной запуск (workflow_dispatch) — для проверки: версия берётся из ввода
+# или из последнего тега, к релизу .deb не прикрепляется.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Версия пакета, например 1.4.0 (пусто — последний тег)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Определить версию
+        id: ver
+        run: |
+          set -e
+          if [ -n "$INPUT_VERSION" ]; then
+            V="$INPUT_VERSION"
+          elif [ -n "$GITHUB_REF_NAME" ] && [ "$GITHUB_REF_NAME" != "main" ]; then
+            V="${GITHUB_REF_NAME#v}"
+          else
+            V="$(git tag --sort=-v:refname | head -1 | sed 's/^v//')"
+          fi
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          echo "Собираю wb-loxone $V"
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+
+      - name: Собрать пакет
+        run: |
+          set -e
+          ROOT=pkgroot
+          mkdir -p "$ROOT/DEBIAN" "$ROOT/mnt/data/wb-loxone" "$ROOT/etc/systemd/system"
+          cp wbloxone.py index.html install.sh "$ROOT/mnt/data/wb-loxone/"
+          chmod +x "$ROOT/mnt/data/wb-loxone/wbloxone.py" "$ROOT/mnt/data/wb-loxone/install.sh"
+          cp packaging/wb-loxone.service "$ROOT/etc/systemd/system/"
+          sed "s/@VERSION@/${{ steps.ver.outputs.version }}/" packaging/DEBIAN/control > "$ROOT/DEBIAN/control"
+          cp packaging/DEBIAN/postinst packaging/DEBIAN/prerm "$ROOT/DEBIAN/"
+          chmod 755 "$ROOT/DEBIAN/postinst" "$ROOT/DEBIAN/prerm"
+          dpkg-deb --build "$ROOT" "wb-loxone_${{ steps.ver.outputs.version }}_all.deb"
+          dpkg-deb --info "wb-loxone_${{ steps.ver.outputs.version }}_all.deb"
+
+      - name: Прикрепить .deb к релизу
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$GITHUB_REF_NAME" "wb-loxone_${{ steps.ver.outputs.version }}_all.deb" --clobber
+
+      - name: Опубликовать apt-репозиторий на ветке apt
+        run: |
+          set -e
+          DEB="wb-loxone_${{ steps.ver.outputs.version }}_all.deb"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cd "$RUNNER_TEMP"
+          git clone --depth 1 "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" apt-repo
+          cd apt-repo
+          git checkout apt 2>/dev/null || git checkout --orphan apt
+          git rm -rf . >/dev/null 2>&1 || true
+          cp "$GITHUB_WORKSPACE/$DEB" .
+          dpkg-scanpackages . /dev/null > Packages
+          gzip -9c Packages > Packages.gz
+          git add -A
+          git commit -m "apt: wb-loxone ${{ steps.ver.outputs.version }}"
+          git push origin HEAD:apt
