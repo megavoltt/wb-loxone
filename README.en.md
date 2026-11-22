@@ -165,7 +165,7 @@ The bridge is designed for a local network.
 
 The project is developed in my spare time. If the bridge saves you hours
 of setup, you can support it on
-[Boosty](https://boosty.to/megavolt) — a one-time donation or a
+[Boosty](https://boosty.to/sagos) — a one-time donation or a
 subscription. The money goes to test equipment (Wiren Board modules, Loxone
 gear) and to keeping the project alive.
 
