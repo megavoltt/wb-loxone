@@ -52,7 +52,21 @@ wb-rules — всё, что контроллер публикует в MQTT.
 
 ## Установка
 
+### Через apt (рекомендуется)
+
 На контроллере Wiren Board, под root:
+
+```bash
+echo "deb [trusted=yes] https://megavoltt.github.io/wb-loxone/ ./" > /etc/apt/sources.list.d/wb-loxone.list
+apt update && apt install wb-loxone
+```
+
+Обновления приходят обычным `apt upgrade`. Пакет ставит код в
+`/mnt/data/wb-loxone/` и службу `wb-loxone`, зависит только от `python3`
+и `mosquitto` — один и тот же пакет работает на Debian 11–13 (wb-2602,
+wb-2609 и новее). Настройки и выбор каналов переживают обновления пакета.
+
+### Скриптом (альтернатива)
 
 ```bash
 wget https://raw.githubusercontent.com/megavoltt/wb-loxone/main/install.sh
@@ -68,10 +82,7 @@ WBLOX_URL=https://cdn.jsdelivr.net/gh/megavoltt/wb-loxone@main sh install.sh
 ```
 
 В конце установщик покажет адрес веб-интерфейса — по умолчанию
-`http://<IP контроллера>:8099`.
-
-Повторный запуск той же команды обновляет мост. Настройки и выбор каналов
-сохраняются.
+`http://<IP контроллера>:8099`. Повторный запуск обновляет мост.
 
 Требования: Wiren Board 7 или 8 с актуальной прошивкой (проверено на wb-2602
 и wb-2609: Debian 11–13, Python 3.9–3.13), Loxone Miniserver Gen1 или Gen2,
