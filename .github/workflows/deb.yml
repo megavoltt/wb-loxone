@@ -52,7 +52,7 @@ jobs:
           sed "s/@VERSION@/${{ steps.ver.outputs.version }}/" packaging/DEBIAN/control > "$ROOT/DEBIAN/control"
           cp packaging/DEBIAN/postinst packaging/DEBIAN/prerm "$ROOT/DEBIAN/"
           chmod 755 "$ROOT/DEBIAN/postinst" "$ROOT/DEBIAN/prerm"
-          dpkg-deb --build "$ROOT" "wb-loxone_${{ steps.ver.outputs.version }}_all.deb"
+          dpkg-deb --build -Z xz "$ROOT" "wb-loxone_${{ steps.ver.outputs.version }}_all.deb"
           dpkg-deb --info "wb-loxone_${{ steps.ver.outputs.version }}_all.deb"
 
       - name: Прикрепить .deb к релизу
