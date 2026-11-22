@@ -4,10 +4,10 @@ Architecture: all
 Maintainer: MegaVolt <https://github.com/megavoltt>
 Depends: python3:any, mosquitto
 Filename: ./wb-loxone_1.4.1_all.deb
-Size: 24708
-MD5sum: 800361bdc49d218d9dcde7b4c0a77b0b
-SHA1: c0791b427fb47ab151d6409b709a20c02d396c48
-SHA256: 7d1ec073e1a6b8262bc5ec69974a1767189e5f9d66944497263ebeae795038b6
+Size: 24712
+MD5sum: 32cb828ed38fa111a8fbdcacc30ecbc4
+SHA1: ead299e0c746288ffea867d352468d7b0ce4d1c4
+SHA256: 92608e8e60e88d2084c3a0a42274a5186a21cf739d2992d87ba983c987865775
 Section: utils
 Priority: optional
 Homepage: https://github.com/megavoltt/wb-loxone
