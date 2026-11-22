@@ -1,0 +1,14 @@
+[Unit]
+Description=WB to Loxone bridge
+After=mosquitto.service network-online.target
+Wants=mosquitto.service
+
+[Service]
+ExecStart=/usr/bin/python3 /mnt/data/wb-loxone/wbloxone.py
+Environment=WBLOX_CONFIG=/mnt/data/etc/wb-loxone.json
+Restart=always
+RestartSec=5
+Nice=5
+
+[Install]
+WantedBy=multi-user.target
