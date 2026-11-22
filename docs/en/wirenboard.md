@@ -103,7 +103,7 @@ readable "Name in Loxone" in the bridge's UI.
 Text channels holding non-numeric values (for example, the Zigbee button
 `action`: `single`, `double`) are sent to Loxone as text: every known value
 becomes a separate digital input in the template (details —
-[loxone.en.md](loxone.en.md#zigbee-buttons-and-switches-zigbee2mqtt) and
-[protocol.en.md](protocol.en.md)). Values that can't be sent (longer than 32
+[loxone.md](loxone.md#zigbee-buttons-and-switches-zigbee2mqtt) and
+[protocol.md](protocol.md)). Values that can't be sent (longer than 32
 characters or without a single Latin letter/digit) are marked "text — not
 sent". `true`/`false` values are sent as `1`/`0`.

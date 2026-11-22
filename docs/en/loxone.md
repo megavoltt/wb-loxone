@@ -97,7 +97,7 @@ to see the actual state (for example, when the relay is also toggled locally).
 
 Do not wire both the `Input 1` state and its events to one block: the block
 will count presses from the input itself and the action will fire twice.
-Details on buttons — in [buttons.en.md](buttons.en.md).
+Details on buttons — in [buttons.md](buttons.md).
 
 **Zigbee buttons and switches (zigbee2mqtt).** Zigbee devices reach MQTT via
 zigbee2mqtt, and presses show up as a text channel `action` with values like
@@ -111,7 +111,7 @@ known value:
 | `action=1_double` | the scene you want |
 | `action=1_long` | one more scene |
 
-Unlike buttons on WB modules (see [buttons.en.md](buttons.en.md)), the events
+Unlike buttons on WB modules (see [buttons.md](buttons.md)), the events
 are produced by zigbee2mqtt itself — there are no hardware counters and no
 `click_ms`/`long_ms` settings here, and no presses are lost.
 

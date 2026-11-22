@@ -20,7 +20,7 @@ template like regular channels.
 > `action` (`1_single`, `2_double`, `1_long`…). The bridge forwards them as
 > text, and in the template each value becomes a separate digital input. How
 > to wire this and why the inputs don't appear right away — see
-> [loxone.en.md](loxone.en.md#zigbee-buttons-and-switches-zigbee2mqtt).
+> [loxone.md](loxone.md#zigbee-buttons-and-switches-zigbee2mqtt).
 
 The pulse lasts 150 ms (`pulse_ms`): first `1` arrives, then `0`. At the input
 of a Loxone block it looks like a short button press.
@@ -153,7 +153,7 @@ delay of up to a second; after switching to mode 4 — 1–30 ms after the secon
 press.
 
 How to switch and how to check that events are enabled — see
-[wirenboard.en.md](wirenboard.en.md#input-mode-and-events).
+[wirenboard.md](wirenboard.md#input-mode-and-events).
 
 ## Wiring in Loxone
 
@@ -175,7 +175,7 @@ separate lines of the same block:
 Do not feed both `Input 1` and its events into one block: the block will start
 counting presses from the input itself and the action will fire twice.
 
-More details — in [loxone.en.md](loxone.en.md).
+More details — in [loxone.md](loxone.md).
 
 ## Debugging
 
