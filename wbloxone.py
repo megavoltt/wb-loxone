@@ -820,7 +820,6 @@ def tpl_inputs(cfg, model, bridge, dev=None, title=None):
     return "\n".join(o) + "\n"
 
 
-
 def tpl_outputs(cfg, model, bridge, dev=None, title=None):
     """Виртуальный выход HTTP. dev=None — все выбранные каналы одним блоком."""
     title = title or cfg["title"]
@@ -843,7 +842,7 @@ def tpl_outputs(cfg, model, bridge, dev=None, title=None):
         else:
             on, off, analog = base + "/<v>", "", "true"
         o.append('\t<VirtualOutCmd Title="%s" Comment="%s/%s" CmdOnMethod="GET" CmdOn="%s" CmdOnHTTP="" '
-                 'CmdOnPost="" CmdAnswer="" '
+                 'CmdOnPost="" CmdOffMethod="GET" CmdOff="%s" CmdOffHTTP="" CmdOffPost="" CmdAnswer="" '
                  'HintText="" Analog="%s" Repeat="0" RepeatRate="0"/>'
                  % (x(name), x(d), x(c), x(on), x(off), analog))
     o.append("</VirtualOut>")
@@ -935,7 +934,7 @@ def make_handler(cfg, model, bridge):
         def do_GET(self):
             path = urllib.parse.urlsplit(self.path).path
             parts = [urllib.parse.unquote(p) for p in path.split("/")]
-            # Команды Loxone: /set/<ключ>/<устройство>/<канал>/<значение> — по ключу, без пароля
+            # Команды Loxone: /set/<ключ>/<устройство>/<канал>/<значение> — по ключу, без пароли
             if len(parts) >= 6 and parts[1] == "set":
                 if not secrets.compare_digest(parts[2], cfg["key"]):
                     return self.reply(403, "неверный ключ")
@@ -1017,7 +1016,7 @@ def make_handler(cfg, model, bridge):
                     if Model.ctype(m) == "text":
                         ctrls[-1]["tsend"] = text_value(ctl["value"]) is not None
                         ctrls[-1]["tvals"] = text_values_for(cfg, d, c)
-                if not ctrls:
+                if not ctrltrs_placeholder_never:
                     continue
                 n_in, n_out = tpl_counts(cfg, model, d, snap)
                 devs.append({
