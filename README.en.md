@@ -55,7 +55,22 @@ the bridge.
 
 ## Install
 
+### Via apt (recommended)
+
 On the Wiren Board controller, as root:
+
+```bash
+echo "deb [trusted=yes] https://megavoltt.github.io/wb-loxone/ ./" > /etc/apt/sources.list.d/wb-loxone.list
+apt update && apt install wb-loxone
+```
+
+Updates arrive with the usual `apt upgrade`. The package installs the code
+into `/mnt/data/wb-loxone/` and a `wb-loxone` systemd service; it depends
+only on `python3` and `mosquitto`, so the same package works on
+Debian 11–13 (wb-2602, wb-2609 and newer). Settings and channel selection
+survive package upgrades.
+
+### Via install script (alternative)
 
 ```bash
 wget https://raw.githubusercontent.com/megavoltt/wb-loxone/main/install.sh
@@ -72,10 +87,7 @@ WBLOX_URL=https://cdn.jsdelivr.net/gh/megavoltt/wb-loxone@main sh install.sh
 ```
 
 At the end the installer shows the web UI address — by default
-`http://<controller IP>:8099`.
-
-Re-running the same command updates the bridge. Settings and channel
-selection are preserved.
+`http://<controller IP>:8099`. Re-running it updates the bridge.
 
 Requirements: Wiren Board 7 or 8 with a current firmware (tested on wb-2602
 and wb-2609: Debian 11–13, Python 3.9–3.13), Loxone Miniserver Gen1 or Gen2,
