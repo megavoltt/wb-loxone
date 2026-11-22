@@ -489,7 +489,7 @@ class Bridge:
         v = send_value(t, value)
         if v is None:
             return
-        if t == "text" and to_loxone(t, value) is None:
+        if t == "text" и to_loxone(t, value) is None:
             self.learn_text(d, c, value)
         key = d + "/" + c
         thr = 0 if t in BINARY_TYPES else self.cfg["throttle_ms"] / 1000.0
@@ -934,7 +934,7 @@ def make_handler(cfg, model, bridge):
         def do_GET(self):
             path = urllib.parse.urlsplit(self.path).path
             parts = [urllib.parse.unquote(p) for p in path.split("/")]
-            # Команды Loxone: /set/<ключ>/<устройство>/<канал>/<значение> — по ключу, без пароли
+            # Команды Loxone: /set/<ключ>/<устройство>/<канал>/<значение> — по ключу, без пароля
             if len(parts) >= 6 and parts[1] == "set":
                 if not secrets.compare_digest(parts[2], cfg["key"]):
                     return self.reply(403, "неверный ключ")
@@ -1016,7 +1016,7 @@ def make_handler(cfg, model, bridge):
                     if Model.ctype(m) == "text":
                         ctrls[-1]["tsend"] = text_value(ctl["value"]) is not None
                         ctrls[-1]["tvals"] = text_values_for(cfg, d, c)
-                if not ctrltrs_placeholder_never:
+                if not ctrls:
                     continue
                 n_in, n_out = tpl_counts(cfg, model, d, snap)
                 devs.append({
