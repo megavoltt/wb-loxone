@@ -18,7 +18,7 @@ Loxone as separate pulses.
   1-Wire, wb-rules) ◄────────────────◄──HTTP── Virtual output   └ Miniserver
 ```
 
-![Web UI: settings and channel selection](docs/img/web-ui.png)
+![Web UI: settings and channel selection](docs/img/web-ui-en.png)
 
 * **States arrive immediately on change.** The bridge sends a UDP packet to
   Loxone as soon as a value changes in MQTT. Loxone does not poll anything.
@@ -84,7 +84,8 @@ Debian 11, Python 3.9), Loxone Miniserver Gen1 or Gen2, Loxone Config 16+.
    you need onto the program page and save to the Miniserver.
 
 After import the blocks look like this — one block per device, lines like
-"channel — device":
+"channel — device" (Loxone Config UI is shown in Russian; English screenshots
+are coming):
 
 ![Virtual outputs of WB-MR6C relays in Loxone Config](docs/img/loxone-vo-relays.png)
 ![WB-MRM2-mini button: input state and press events](docs/img/loxone-buttons.png)
