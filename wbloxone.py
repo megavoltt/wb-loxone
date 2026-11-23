@@ -26,7 +26,7 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-VERSION = "1.4.1"
+VERSION = "1.4.2"
 HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.environ.get("WBLOX_CONFIG", "/mnt/data/etc/wb-loxone.json")
 
@@ -404,6 +404,17 @@ TEXT_SEEDS = [
 ]
 TEXT_RE = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_\-]{0,31}$")
 
+# Каналы, чьи значения — моментные события (нажатия), а не состояния.
+# Такое значение нельзя повторять при resync: Loxone примет старое событие
+# за новое нажатие — «нажатие из ниоткуда» каждый resync.
+TEXT_EVENT_KEYS = ("action",)
+
+
+def text_is_event(channel):
+    """Текстовый канал со значениями-событиями (action zigbee2mqtt и т.п.)."""
+    low = channel.lower()
+    return any(k in low for k in TEXT_EVENT_KEYS)
+
 
 def text_value(value):
     """Текст WB → строка для UDP; None — не отправлять (пустое/слишком странное)."""
@@ -555,6 +566,10 @@ class Bridge:
                      for c, x in dv["controls"].items()]
         for d, c, meta, value in items:
             if self.selected(d, c) and Model.readable(meta):
+                # события не повторяем: последнее значение action — прошлое
+                # нажатие, его пересылка выглядит в Loxone как новое
+                if Model.ctype(meta) == "text" and text_is_event(c):
+                    continue
                 v = send_value(Model.ctype(meta), value)
                 if v is not None:
                     self.send(d, c, v)
