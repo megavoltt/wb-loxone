@@ -20,20 +20,21 @@ DEV, CH = "wb-msw_1", "action"
 class Rig:
     """Модель с одним текстовым каналом и записью пакетов, ушедших в Loxone."""
 
-    def __init__(self, selected=True, meta=None):
+    def __init__(self, ch=CH, selected=True, meta=None):
+        self.ch = ch
         self.tmp = tempfile.TemporaryDirectory()
         self.cfg = wl.Config(os.path.join(self.tmp.name, "cfg.json"))
         self.cfg.update({"throttle_ms": 0,
-                         "selected": {("%s/%s" % (DEV, CH)): True} if selected else {}})
+                         "selected": {("%s/%s" % (DEV, ch)): True} if selected else {}})
         self.model = wl.Model()
         self.bridge = wl.Bridge(self.cfg, self.model)
         self.sent = []
         self.bridge.send = lambda d, c, v: self.sent.append("%s/%s=%s" % (d, c, v))
-        self.model.handle("/devices/%s/controls/%s/meta" % (DEV, CH),
+        self.model.handle("/devices/%s/controls/%s/meta" % (DEV, ch),
                           meta or '{"type":"text","readonly":true}')
 
     def put(self, value):
-        self.model.handle("/devices/%s/controls/%s" % (DEV, CH), value)
+        self.model.handle("/devices/%s/controls/%s" % (DEV, self.ch), value)
 
 
 class TextValues(unittest.TestCase):
@@ -54,6 +55,16 @@ class TextValues(unittest.TestCase):
         for bad in (None, "", "x" * 40):
             self.assertIsNone(wl.text_value(bad), bad)
         self.assertIsNone(wl.send_value("value", "single"))  # не текстовый тип — только числа
+
+
+class EventChannel(unittest.TestCase):
+    def test_action_is_event(self):
+        self.assertTrue(wl.text_is_event("action"))
+        self.assertTrue(wl.text_is_event("Button Action"))
+
+    def test_state_channels_are_not_events(self):
+        for ch in ("mode", "preset", "state", "status", "current_temp"):
+            self.assertFalse(wl.text_is_event(ch), ch)
 
 
 class Learning(unittest.TestCase):
@@ -108,9 +119,7 @@ class Learning(unittest.TestCase):
                                   for v in ("single", "double", "triple")])
 
     def test_seeds_by_channel_name(self):
-        r = Rig(CH and "mode")
-        r.model.handle("/devices/%s/controls/%s/meta" % (DEV, "mode"),
-                       '{"type":"text","readonly":true}')
+        r = Rig(ch="mode")
         vals = wl.text_values_for(r.cfg, DEV, "mode")
         for v in ("off", "heat", "auto"):
             self.assertIn(v, vals)
@@ -155,13 +164,25 @@ class Template(unittest.TestCase):
 
 
 class Resync(unittest.TestCase):
-    def test_text_sent_on_resync(self):
+    def test_event_text_not_resent_on_resync(self):
+        # action — событие: повтор последнего значения при resync (раз в resync_s
+        # и после сохранения настроек) выглядит в Loxone как новое нажатие
         r = Rig()
         r.put("single")
         r.sent.clear()
         n = r.bridge.resync()
+        self.assertEqual(n, 0)
+        self.assertEqual(r.sent, [])
+
+    def test_state_text_resent_on_resync(self):
+        # режим/статус — состояние: после перезагрузки Miniserver оно
+        # должно восстановиться, поэтому повторяется
+        r = Rig(ch="mode")
+        r.put("heat")
+        r.sent.clear()
+        n = r.bridge.resync()
         self.assertEqual(n, 1)
-        self.assertTrue(any("=single" in s for s in r.sent))
+        self.assertTrue(any("=heat" in s for s in r.sent))
 
 
 if __name__ == "__main__":
